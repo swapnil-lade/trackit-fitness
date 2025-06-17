@@ -101,9 +101,10 @@ export const Sidebar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTM
         className={cn(
           "transition-all duration-300 ease-in-out",
           "bg-sidebar text-sidebar-foreground border-r border-sidebar-border",
-          isMobile && "fixed inset-y-0 left-0 z-40 transform flex flex-col",
+          "flex flex-col", // Ensure it's a flex column for header/content/footer
+          isMobile && "fixed inset-y-0 left-0 z-40 transform",
           isMobile && (openMobile ? `${mobileOpenWidth} translate-x-0` : `w-0 -translate-x-full`),
-          !isMobile && "sticky top-0 h-screen flex flex-col", 
+          !isMobile && "sticky top-0 h-screen", 
           !isMobile && collapsible === 'icon' && (isCollapsed ? desktopCollapsedWidth : desktopExpandedWidth),
           !isMobile && collapsible !== 'icon' && desktopExpandedWidth,
           className 
@@ -209,24 +210,14 @@ SidebarSeparator.displayName = "SidebarSeparator";
 
 export const SidebarInset = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => {
-    const { isMobile, isCollapsed } = useSidebar();
-    
-    let paddingLeftStyle = '0px';
-    if (!isMobile) {
-      // These values should match the Tailwind width classes (w-20 = 5rem, w-64 = 16rem)
-      const collapsedWidthRem = 5; 
-      const expandedWidthRem = 16; 
-      paddingLeftStyle = isCollapsed ? `${collapsedWidthRem}rem` : `${expandedWidthRem}rem`;
-    }
-
     return (
       <div 
         ref={ref}
         className={cn(
-          "flex-1 flex flex-col transition-[padding-left] duration-300 ease-in-out bg-background", // Added bg-background
+          "flex-1 flex flex-col bg-background", // Removed transition-[padding-left]
           className
         )}
-        style={{ paddingLeft: paddingLeftStyle }}
+        // Removed inline style for paddingLeft
         {...props}
       >
         {children}
