@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -6,9 +7,9 @@ import { FITNESS_STATS_DATA } from "@/lib/constants";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { BarChart, LineChart, CheckSquare, PlusCircle } from 'lucide-react';
+import { BarChart as LucideBarChart, LineChart as LucideLineChart, CheckSquare, PlusCircle } from 'lucide-react'; // Renamed to avoid conflict
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Pie, PieChart, Cell } from "recharts";
+import { Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Pie, PieChart, Cell, LineChart, BarChart } from "recharts"; // Added LineChart, BarChart here
 import React, { useState, useEffect } from "react";
 
 const dailyProgressData = [
@@ -78,24 +79,22 @@ export default function DashboardPage() {
         <Card className="lg:col-span-2 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="font-headline flex items-center">
-              <BarChart className="h-6 w-6 mr-2 text-primary" /> Weekly Activity
+              <LucideBarChart className="h-6 w-6 mr-2 text-primary" /> Weekly Activity
             </CardTitle>
             <CardDescription>Your calories, steps, and workout duration over the last week.</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={dailyProgressData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip content={<ChartTooltipContent indicator="dot" />} />
-                  <Legend content={<ChartLegendContent />} />
-                  <Line type="monotone" dataKey="calories" stroke="var(--color-calories)" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="steps" stroke="var(--color-steps)" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="workout" stroke="var(--color-workout)" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
+              <LineChart data={dailyProgressData} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis />
+                <Tooltip content={<ChartTooltipContent indicator="dot" />} />
+                <Legend content={<ChartLegendContent />} />
+                <Line type="monotone" dataKey="calories" stroke="var(--color-calories)" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="steps" stroke="var(--color-steps)" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="workout" stroke="var(--color-workout)" strokeWidth={2} dot={false} />
+              </LineChart>
             </ChartContainer>
           </CardContent>
         </Card>
@@ -125,23 +124,21 @@ export default function DashboardPage() {
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="font-headline flex items-center">
-              <PieChart className="h-6 w-6 mr-2 text-primary" /> Daily Macros
+              <PieChart className="h-6 w-6 mr-2 text-primary" /> Daily Macros {/* This PieChart is lucide-react icon, PieChart for recharts is imported from "recharts" */}
             </CardTitle>
             <CardDescription>Your progress towards daily macronutrient targets.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
              <ChartContainer config={{}} className="h-[200px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={macroData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                     {macroData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<ChartTooltipContent hideLabel />} />
-                  <Legend content={<ChartLegendContent />} />
-                </PieChart>
-              </ResponsiveContainer>
+              <PieChart> {/* This PieChart is from "recharts" */}
+                <Pie data={macroData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                   {macroData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <Tooltip content={<ChartTooltipContent hideLabel />} />
+                <Legend content={<ChartLegendContent />} />
+              </PieChart>
             </ChartContainer>
             <div className="space-y-3">
               {macroData.map((macro) => (
@@ -150,8 +147,8 @@ export default function DashboardPage() {
                     <span className="text-sm font-medium">{macro.name}</span>
                     <span className="text-sm text-muted-foreground">{macro.value}g / {macro.target}g</span>
                   </div>
-                  <Progress value={(macro.value / macro.target) * 100} className="h-2 [&>div]:bg-[var(--color-chart-1)]" 
-                  style={{'--chart-color': macro.fill} as React.CSSProperties} // A bit of a hack to use dynamic color
+                  <Progress value={(macro.value / macro.target) * 100} className="h-2 [&>div]:bg-[var(--color-chart-1)]"
+                  style={{'--chart-color': macro.fill} as React.CSSProperties}
                   />
                 </div>
               ))}
