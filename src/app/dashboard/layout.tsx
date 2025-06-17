@@ -70,7 +70,7 @@ export default function DashboardLayout({
             </Link>
           </SidebarHeader>
           <SidebarContent className="p-2 flex-1 flex flex-col">
-            <ScrollArea className="h-full"> 
+            <ScrollArea className="flex-1"> {/* Changed from h-full to flex-1 */}
               <SidebarMenu>{renderNavLinks(DASHBOARD_NAV_LINKS)}</SidebarMenu>
             </ScrollArea>
           </SidebarContent>
