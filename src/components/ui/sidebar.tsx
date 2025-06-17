@@ -32,9 +32,21 @@ export const SidebarFooter = React.forwardRef<HTMLDivElement, React.HTMLAttribut
 );
 SidebarFooter.displayName = "SidebarFooter";
 
-export const SidebarTrigger = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
-  ({ className, children, ...props }, ref) => <button ref={ref} className={cn("minimal-sidebar-trigger", className)} {...props}>{children || "Trigger"}</button>
-);
+export const SidebarTrigger = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }
+>(({ className, children, asChild = false, ...props }, ref) => {
+  const Comp = asChild ? Slot : "button";
+  return (
+    <Comp
+      ref={ref}
+      className={cn("minimal-sidebar-trigger", className)}
+      {...props}
+    >
+      {children || (!asChild && "Trigger")}
+    </Comp>
+  );
+});
 SidebarTrigger.displayName = "SidebarTrigger";
 
 export const SidebarMenu = React.forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLUListElement>>(
@@ -56,6 +68,11 @@ export const SidebarMenuButton = React.forwardRef<
   }
 >(({ className, children, asChild = false, isActive, tooltip, ...buttonProps }, ref) => {
   const Comp = asChild ? Slot : "button";
+  // Remove isActive and tooltip from buttonProps if they are not standard HTML attributes for a button
+  // For this stub, we'll assume they are custom and only use tooltip for the title attribute.
+  const { isActive: _isActive, tooltip: _tooltip, ...restButtonProps } = buttonProps as any;
+
+
   return (
     <Comp
       ref={ref}
@@ -64,7 +81,7 @@ export const SidebarMenuButton = React.forwardRef<
         // 'bg-accent text-accent-foreground': isActive,
       })}
       title={tooltip} // Use tooltip for the standard HTML title attribute
-      {...buttonProps} // Spread only the remaining standard button attributes
+      {...restButtonProps} // Spread only the remaining standard button attributes
     >
       {children}
     </Comp>
@@ -87,9 +104,7 @@ export const SidebarInset = React.forwardRef<HTMLDivElement, React.HTMLAttribute
 );
 SidebarInset.displayName = "SidebarInset";
 
-// Minimal stub for useSidebar if it were to be exported and used, though layout.tsx doesn't directly use it.
 export const useSidebar = () => {
-  // console.log("Minimal useSidebar called");
   return {
     state: "expanded",
     open: true,
@@ -101,17 +116,6 @@ export const useSidebar = () => {
   };
 };
 
-// Ensure other exports from the original file that layout.tsx might expect are stubbed or handled.
-// The layout imports the following:
-// SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter,
-// SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton,
-// SidebarMenuBadge, SidebarSeparator, SidebarInset.
-// The stubs above cover these.
-// Other components like SidebarRail, SidebarInput, SidebarGroup etc. are not directly imported by layout.tsx.
-// Thus, they are not strictly needed for this minimal test focused on layout.tsx parsing.
-
-// To be safe, here are stubs for other components that were in the original file,
-// though not directly used by layout.tsx, to prevent any "export not found" issues if anything else internally tries to use them.
 export const SidebarRail = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
   (props, ref) => <button ref={ref} {...props} />
 );
