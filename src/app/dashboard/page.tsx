@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { LineChart as LucideLineChartIcon, CheckSquare, PlusCircle, Dumbbell, Flame, Utensils, PieChart as LucidePieChart, CalendarDays } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Cell, Line, LineChart, Pie, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { Cell, Line, LineChart, Pie, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import React, { useState, useEffect } from "react";
 
 // Basic interfaces for data loaded from localStorage
