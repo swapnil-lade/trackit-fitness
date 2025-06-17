@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { PlusCircle, Edit3, Trash2, Apple, Utensils, Droplets, Flame, PieChart as PieChartIcon } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Pie, PieChart as RechartsPieChart, Cell, Legend, ResponsiveContainer } from "recharts";
+import { Pie, PieChart as RechartsPieChart, Cell, Legend, ResponsiveContainer, Tooltip } from "recharts";
 
 
 interface Meal {
