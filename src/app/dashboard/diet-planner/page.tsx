@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -11,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { PlusCircle, Edit3, Trash2, Apple, Utensils, Droplets, Flame, PieChart as PieChartIcon } from "lucide-react";
 import { SAMPLE_MEALS } from '@/lib/constants';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Bar, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Pie, PieChart as RechartsPieChart, Cell } from "recharts";
+import { Bar, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Pie, PieChart as RechartsPieChart, Cell, Legend } from "recharts";
 
 
 interface Meal {
@@ -276,3 +277,5 @@ export default function DietPlannerPage() {
 // However, using inline style with CSS variables is preferred.
 // Make sure --progress-color is defined or handled by Progress component if this approach is chosen.
 // For now, the inline style with CSS variable is used on the Progress component itself.
+
+    
