@@ -27,11 +27,10 @@ export const SidebarProvider = ({ children, defaultOpen = true }: { children: Re
 
   useEffect(() => {
     if (isMobile) {
-      setIsCollapsed(false); // No collapsed state on mobile
+      setIsCollapsed(false); 
     } else {
-      // Sync collapsed state with openDesktop when switching to desktop
       setIsCollapsed(!openDesktop);
-      setOpenMobile(false); // Close mobile overlay
+      setOpenMobile(false); 
     }
   }, [isMobile, openDesktop]);
 
@@ -48,8 +47,8 @@ export const SidebarProvider = ({ children, defaultOpen = true }: { children: Re
   };
   
   const value = useMemo(() => ({
-    open: isMobile ? openMobile : openDesktop, // 'open' reflects current relevant open state
-    setOpen: (valOrUpdater) => { // Generic setOpen, applies to correct state
+    open: isMobile ? openMobile : openDesktop,
+    setOpen: (valOrUpdater) => { 
       if (isMobile) {
         setOpenMobile(valOrUpdater);
       } else {
@@ -62,7 +61,7 @@ export const SidebarProvider = ({ children, defaultOpen = true }: { children: Re
     setOpenMobile,
     isMobile,
     toggleSidebar,
-    isCollapsed: isMobile ? false : isCollapsed, // isCollapsed is only for desktop
+    isCollapsed: isMobile ? false : isCollapsed, 
     setIsCollapsed: (valOrUpdater) => { 
       if (!isMobile) {
         const newCollapsedState = typeof valOrUpdater === 'function' ? valOrUpdater(isCollapsed) : valOrUpdater;
@@ -92,8 +91,8 @@ export const Sidebar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTM
   ({ className, children, variant, collapsible = "icon", ...props }, ref) => {
     const { isMobile, openMobile, isCollapsed } = useSidebar();
     
-    const desktopExpandedWidth = "md:w-64"; // 16rem
-    const desktopCollapsedWidth = "md:w-20"; // 5rem
+    const desktopExpandedWidth = "md:w-64"; 
+    const desktopCollapsedWidth = "md:w-20"; 
     const mobileOpenWidth = "w-64";
 
     return (
@@ -102,13 +101,10 @@ export const Sidebar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTM
         className={cn(
           "transition-all duration-300 ease-in-out",
           "bg-sidebar text-sidebar-foreground border-r border-sidebar-border",
-          // Mobile specific: fixed overlay
           isMobile && "fixed inset-y-0 left-0 z-40 transform flex flex-col",
           isMobile && (openMobile ? `${mobileOpenWidth} translate-x-0` : `w-0 -translate-x-full`),
-          // Desktop specific: sticky or part of flex layout
-          !isMobile && "sticky top-0 h-screen flex flex-col", // Ensure it's full height and sticky
+          !isMobile && "sticky top-0 h-screen flex flex-col", 
           !isMobile && collapsible === 'icon' && (isCollapsed ? desktopCollapsedWidth : desktopExpandedWidth),
-          // Fallback for non-icon collapsible or if always expanded on desktop
           !isMobile && collapsible !== 'icon' && desktopExpandedWidth,
           className 
         )}
@@ -215,23 +211,19 @@ export const SidebarInset = React.forwardRef<HTMLDivElement, React.HTMLAttribute
   ({ className, children, ...props }, ref) => {
     const { isMobile, isCollapsed } = useSidebar();
     
-    const expandedWidthRem = 16; // Corresponds to md:w-64
-    const collapsedWidthRem = 5;  // Corresponds to md:w-20
-    const baseFontSize = 16; // Assuming 1rem = 16px
-
-    const expandedWidthPx = `${expandedWidthRem * baseFontSize}px`;
-    const collapsedWidthPx = `${collapsedWidthRem * baseFontSize}px`;
-
     let paddingLeftStyle = '0px';
     if (!isMobile) {
-      paddingLeftStyle = isCollapsed ? collapsedWidthPx : expandedWidthPx;
+      // These values should match the Tailwind width classes (w-20 = 5rem, w-64 = 16rem)
+      const collapsedWidthRem = 5; 
+      const expandedWidthRem = 16; 
+      paddingLeftStyle = isCollapsed ? `${collapsedWidthRem}rem` : `${expandedWidthRem}rem`;
     }
 
     return (
       <div 
         ref={ref}
         className={cn(
-          "flex-1 flex flex-col transition-[padding-left] duration-300 ease-in-out", 
+          "flex-1 flex flex-col transition-[padding-left] duration-300 ease-in-out bg-background", // Added bg-background
           className
         )}
         style={{ paddingLeft: paddingLeftStyle }}
@@ -243,5 +235,3 @@ export const SidebarInset = React.forwardRef<HTMLDivElement, React.HTMLAttribute
   }
 );
 SidebarInset.displayName = "SidebarInset";
-
-    

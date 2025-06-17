@@ -55,19 +55,18 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen w-full bg-sidebar"> {/* Overall container with sidebar background */}
+      <div className="flex min-h-screen w-full"> {/* Removed bg-sidebar here */}
         <Sidebar 
             variant="sidebar" 
             collapsible="icon"
-            // className ensured by Sidebar component itself
         >
           <SidebarHeader className="p-4 flex items-center group-data-[collapsible=icon]:group-data-[collapsed=true]:justify-center">
             <Link href="/dashboard" className="flex items-center gap-2">
               <Logo className="h-8 w-auto text-primary group-data-[collapsible=icon]:group-data-[collapsed=true]:h-7 group-data-[collapsible=icon]:group-data-[collapsed=true]:w-7" />
             </Link>
           </SidebarHeader>
-          <SidebarContent className="p-2"> {/* flex-1 and flex-col are handled by SidebarContent */}
-            <ScrollArea className="flex-1"> {/* ScrollArea takes flex-1 within SidebarContent */}
+          <SidebarContent className="p-2"> 
+            <ScrollArea className="flex-1"> 
               <SidebarMenu>{renderNavLinks(DASHBOARD_NAV_LINKS)}</SidebarMenu>
             </ScrollArea>
           </SidebarContent>
@@ -88,7 +87,7 @@ export default function DashboardLayout({
             <SidebarSeparator className="my-2" />
             <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:group-data-[collapsed=true]:justify-center">
               <Avatar className="h-9 w-9 group-data-[collapsible=icon]:group-data-[collapsed=true]:h-7 group-data-[collapsible=icon]:group-data-[collapsed=true]:w-7">
-                <AvatarImage src="https://placehold.co/100x100.png" alt="User Avatar" data-ai-hint="user avatar" />
+                <AvatarImage src="https://placehold.co/100x100.png" alt="User Avatar" data-ai-hint="user avatar"/>
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
               <div className="group-data-[collapsible=icon]:group-data-[collapsed=true]:hidden">
@@ -98,9 +97,9 @@ export default function DashboardLayout({
             </div>
           </SidebarFooter>
         </Sidebar>
-        <SidebarInset> {/* This component now handles its own padding and flex properties */}
+        <SidebarInset> 
           <DashboardNavbar />
-          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-background"> {/* bg-background for content area, overflow-y-auto for content scroll */}
+          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-background"> 
             {children}
           </main>
         </SidebarInset>
@@ -108,5 +107,3 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
-
-    
