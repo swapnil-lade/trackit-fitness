@@ -8,13 +8,48 @@ import { Slot } from "@radix-ui/react-slot";
 // SidebarProvider is currently removed from layout.tsx for debugging,
 // but we keep its definition here in case it's restored later.
 export const SidebarProvider = ({ children, defaultOpen }: { children: ReactNode, defaultOpen?: boolean }) => {
+  // In a real scenario, this would use React.Context to provide state
+  const [isMobile, setIsMobile] = React.useState(false); // Mock state
+  const [open, setOpen] = React.useState(defaultOpen ?? false);
+  const [openMobile, setOpenMobile] = React.useState(false);
+
+  // Mock effect for mobile detection
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const value = React.useMemo(() => ({
+    open,
+    setOpen,
+    openMobile,
+    setOpenMobile,
+    isMobile,
+    toggleSidebar: () => setOpen(prev => !prev), // Basic toggle
+  }), [open, openMobile, isMobile]);
+  
+  // This is where you would use React.createContext and Provider
+  // For now, just wrapping children. Replace with actual context logic.
+  // Example: return <ActualSidebarContext.Provider value={value}>{children}</ActualSidebarContext.Provider>;
   return <div data-testid="sidebar-provider">{children}</div>;
 };
 SidebarProvider.displayName = "SidebarProvider";
 
 // --- Minimal Stubs for other imported components ---
 export const Sidebar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { variant?: string, collapsible?: string }>(
-  ({ className, children, ...props }, ref) => <aside ref={ref} className={cn("minimal-sidebar", className)} {...props}>{children}</aside>
+  ({ className, children, variant, collapsible, ...props }, ref) => (
+    <aside 
+      ref={ref} 
+      className={cn("minimal-sidebar", className)} 
+      data-variant={variant}
+      data-collapsible={collapsible}
+      {...props}
+    >
+      {children}
+    </aside>
+  )
 );
 Sidebar.displayName = "Sidebar";
 
@@ -84,12 +119,14 @@ export const SidebarMenuButton = React.forwardRef<
   const Comp = asChild ? Slot : "button";
   // Remove custom props not meant for the DOM element if Comp is 'button'
   const { 
+    // Ensure these props are not passed to the DOM element if it's a button
     asChild: _asChild, 
     isActive: _isActive, 
     tooltip: _tooltip, 
     ...restButtonProps 
   } = buttonProps as any;
 
+  // Use restButtonProps if Comp is 'button', otherwise use the original buttonProps for Slot
   const domProps = Comp === 'button' ? restButtonProps : buttonProps;
 
 
@@ -128,6 +165,12 @@ SidebarInset.displayName = "SidebarInset";
 // if they have specific props like 'asChild'.
 
 export const useSidebar = () => {
+  // This would typically come from React.useContext(ActualSidebarContext)
+  // Mocking the return value for now.
+  const context = React.useContext(null as any); // Replace null with your actual context
+  if (context) return context;
+
+  // Fallback mock if context isn't set up (as in this stubbed provider)
   return {
     state: "expanded", // "expanded" | "collapsed"
     open: true,
