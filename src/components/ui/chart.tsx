@@ -105,8 +105,8 @@ const ChartTooltip = RechartsPrimitive.Tooltip
 
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
-  Omit<React.ComponentProps<typeof RechartsPrimitive.Tooltip>, "content"> & // Omit content from Recharts TooltipProps
-    React.HTMLAttributes<HTMLDivElement> & { // Add HTMLDivAttributes
+  Omit<React.ComponentProps<typeof RechartsPrimitive.Tooltip>, "content"> &
+    React.HTMLAttributes<HTMLDivElement> & {
       hideLabel?: boolean
       hideIndicator?: boolean
       indicator?: "line" | "dot" | "dashed"
@@ -128,10 +128,11 @@ const ChartTooltipContent = React.forwardRef<
       labelFormatter,
       labelClassName,
       formatter,
-      color, // This prop seems to be passed but not used directly in default rendering.
+      color, 
       nameKey,
       labelKey,
-      ...props // capture other div props
+      accessibilityLayer, // Destructure accessibilityLayer here
+      ...props
     },
     ref
   ) => {
@@ -146,13 +147,12 @@ const ChartTooltipContent = React.forwardRef<
       const key = `${labelKey || item.dataKey || item.name || "value"}`
       const itemConfig = getPayloadConfigFromPayload(config, item, key)
       
-      // Ensure `label` from props is treated as a string for config lookup if not a ReactNode
       const value =
         !labelKey && typeof label === "string"
           ? config[label as keyof typeof config]?.label || label
           : itemConfig?.label
 
-      if (labelFormatter && value !== undefined) { // Check if value is defined for formatter
+      if (labelFormatter && value !== undefined) {
         return (
           <div className={cn("font-medium", labelClassName)}>
             {labelFormatter(value as string, payload)} 
@@ -160,7 +160,7 @@ const ChartTooltipContent = React.forwardRef<
         )
       }
 
-      if (value === undefined || value === null) { // Check if value is undefined or null
+      if (value === undefined || value === null) {
         return null
       }
 
@@ -188,7 +188,7 @@ const ChartTooltipContent = React.forwardRef<
           "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl",
           className
         )}
-        {...props} // Spread div props
+        {...props}
       >
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
@@ -200,7 +200,7 @@ const ChartTooltipContent = React.forwardRef<
 
             return (
               <div
-                key={item.dataKey || index} // Ensure a key is present
+                key={item.dataKey || index}
                 className={cn(
                   "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
                   indicator === "dot" && "items-center"
@@ -246,7 +246,7 @@ const ChartTooltipContent = React.forwardRef<
                           {itemConfig?.label || item.name}
                         </span>
                       </div>
-                      {item.value !== undefined && item.value !== null && ( // Check for defined, non-null value
+                      {item.value !== undefined && item.value !== null && (
                         <span className="font-mono font-medium tabular-nums text-foreground">
                           {item.value.toLocaleString()}
                         </span>
@@ -262,7 +262,7 @@ const ChartTooltipContent = React.forwardRef<
     )
   }
 )
-ChartTooltipContent.displayName = "ChartTooltipContent" // Corrected display name
+ChartTooltipContent.displayName = "ChartTooltipContent"
 
 const ChartLegend = RechartsPrimitive.Legend
 
@@ -299,7 +299,7 @@ const ChartLegendContent = React.forwardRef<
 
           return (
             <div
-              key={item.value as string} // Ensure item.value has a keyable type
+              key={item.value as string}
               className={cn(
                 "flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground"
               )}
@@ -314,7 +314,7 @@ const ChartLegendContent = React.forwardRef<
                   }}
                 />
               )}
-              {itemConfig?.label || item.value} {/* Fallback to item.value if label is not in config */}
+              {itemConfig?.label || item.value}
             </div>
           )
         })}
@@ -322,7 +322,7 @@ const ChartLegendContent = React.forwardRef<
     )
   }
 )
-ChartLegendContent.displayName = "ChartLegendContent" // Corrected display name
+ChartLegendContent.displayName = "ChartLegendContent"
 
 // Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(
@@ -371,3 +371,4 @@ export {
   ChartLegendContent,
   ChartStyle,
 }
+
