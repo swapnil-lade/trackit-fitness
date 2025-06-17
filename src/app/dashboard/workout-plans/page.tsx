@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, Edit3, Trash2, Dumbbell, CalendarDays, Target, Repeat, Clock, Eye } from "lucide-react";
-// import { SAMPLE_WORKOUT_PLANS, WORKOUT_EXERCISES_SAMPLE } from '@/lib/constants'; // No longer using for initial state
 import { Badge } from '@/components/ui/badge';
 
 interface Exercise {
@@ -31,7 +30,7 @@ interface WorkoutPlan {
 }
 
 export default function WorkoutPlansPage() {
-  const [plans, setPlans] = useState<WorkoutPlan[]>([]); // Initialize with empty array
+  const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<WorkoutPlan | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -42,6 +41,30 @@ export default function WorkoutPlansPage() {
   const [daysPerWeek, setDaysPerWeek] = useState(3);
   const [goal, setGoal] = useState('');
   const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    const storedPlans = localStorage.getItem('workoutPlans');
+    if (storedPlans) {
+      try {
+        setPlans(JSON.parse(storedPlans));
+      } catch (e) {
+        console.error("Failed to parse workout plans from localStorage", e);
+        localStorage.removeItem('workoutPlans'); // Clear corrupted data
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    // Only save if plans array is not empty or it's the initial empty state from a successful load
+    // This prevents overwriting good data with an empty array during initial mount if localStorage is slow
+    if (plans.length > 0 || localStorage.getItem('workoutPlans')) {
+        localStorage.setItem('workoutPlans', JSON.stringify(plans));
+    }
+    // If plans become empty after having data, clear localStorage
+    if (plans.length === 0 && localStorage.getItem('workoutPlans') && JSON.parse(localStorage.getItem('workoutPlans')!).length > 0) {
+        localStorage.removeItem('workoutPlans');
+    }
+  }, [plans]);
 
 
   const handleOpenModal = (plan: WorkoutPlan | null = null) => {
@@ -70,7 +93,6 @@ export default function WorkoutPlansPage() {
         daysPerWeek, 
         goal, 
         description,
-        // Initialize with a structure for exercises, e.g., for each day up to daysPerWeek
         exercises: Array.from({ length: daysPerWeek }, (_, i) => ({ day: `Day ${i + 1}`, items: [] }))
       };
       setPlans([...plans, newPlan]);

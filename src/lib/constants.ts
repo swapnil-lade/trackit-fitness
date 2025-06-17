@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   Dumbbell,
@@ -33,14 +34,15 @@ export const DASHBOARD_NAV_LINKS: NavLink[] = [
 export const DASHBOARD_SETTINGS_LINKS: NavLink[] = [
  { href: '/dashboard/profile', label: 'Profile', icon: UserCircle },
  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
- { href: '#', label: 'Logout', icon: LogOut }, // Placeholder for logout functionality
+ { href: '#', label: 'Logout', icon: LogOut }, 
 ];
 
-export const FITNESS_STATS_DATA = [
-  { title: 'Calories Burned', value: '0', unit: 'kcal', icon: Flame, color: 'text-red-500' },
-  { title: 'Current Workout', value: 'N/A', unit: '', icon: Dumbbell, color: 'text-green-500' },
-  { title: 'Meals Logged', value: '0', unit: 'meals', icon: Utensils, color: 'text-orange-500' },
+export const FITNESS_STATS_DATA_PLACEHOLDERS = [
+  { title: 'Calories Consumed', value: '0', unit: 'kcal', icon: Flame, color: 'text-red-500' },
+  { title: 'Workout Plans', value: '0', unit: 'plans', icon: Dumbbell, color: 'text-green-500' },
+  { title: 'Meals Logged Today', value: '0', unit: 'meals', icon: Utensils, color: 'text-orange-500' },
 ];
+
 
 export const DAILY_SCHEDULE_TASK_TYPES = [
   { label: 'Training', value: 'training', icon: Dumbbell, color: 'bg-blue-500' },
@@ -50,6 +52,8 @@ export const DAILY_SCHEDULE_TASK_TYPES = [
   { label: 'Custom', value: 'custom', icon: PlusCircle, color: 'bg-gray-500' },
 ];
 
+// SAMPLE_WORKOUT_PLANS and SAMPLE_MEALS are no longer used for initial state
+// but can be kept for reference or testing if needed.
 export const SAMPLE_WORKOUT_PLANS = [
   { id: 'plan1', name: 'Full Body Strength', days: 3, goal: 'Muscle Gain' },
   { id: 'plan2', name: 'Cardio Blast', days: 5, goal: 'Weight Loss' },

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { PlusCircle, Edit3, Trash2, Apple, Utensils, Droplets, Flame, PieChart as PieChartIcon } from "lucide-react";
-// import { SAMPLE_MEALS } from '@/lib/constants'; // No longer using for initial state
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { Bar, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Pie, PieChart as RechartsPieChart, Cell, Legend } from "recharts";
 
@@ -39,7 +38,7 @@ const chartConfig = {
 };
 
 export default function DietPlannerPage() {
-  const [loggedMeals, setLoggedMeals] = useState<Meal[]>([]); // Initialize with empty array
+  const [loggedMeals, setLoggedMeals] = useState<Meal[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentMeal, setCurrentMeal] = useState<Meal | null>(null);
 
@@ -50,6 +49,27 @@ export default function DietPlannerPage() {
   const [carbs, setCarbs] = useState(0);
   const [fat, setFat] = useState(0);
   const [mealType, setMealType] = useState<'Breakfast' | 'Lunch' | 'Dinner' | 'Snack'>('Snack');
+
+  useEffect(() => {
+    const storedMeals = localStorage.getItem('loggedMeals');
+    if (storedMeals) {
+      try {
+        setLoggedMeals(JSON.parse(storedMeals));
+      } catch (e) {
+        console.error("Failed to parse logged meals from localStorage", e);
+        localStorage.removeItem('loggedMeals'); // Clear corrupted data
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (loggedMeals.length > 0 || localStorage.getItem('loggedMeals')) {
+        localStorage.setItem('loggedMeals', JSON.stringify(loggedMeals));
+    }
+    if (loggedMeals.length === 0 && localStorage.getItem('loggedMeals') && JSON.parse(localStorage.getItem('loggedMeals')!).length > 0) {
+        localStorage.removeItem('loggedMeals');
+    }
+  }, [loggedMeals]);
 
   const dailyTotals = useMemo(() => {
     return loggedMeals.reduce((acc, meal) => {
@@ -167,7 +187,7 @@ export default function DietPlannerPage() {
         <h2 className="text-2xl font-headline font-semibold">Logged Meals</h2>
         {mealTypes.map(type => {
           const mealsOfType = loggedMeals.filter(m => m.type === type);
-          if (mealsOfType.length === 0 && type !== 'Snack' && !loggedMeals.some(m => m.type === 'Snack')) return null; // Only show snack if other types are empty and snack itself might have items
+          if (mealsOfType.length === 0 && type !== 'Snack' && !loggedMeals.some(m => m.type === 'Snack')) return null; 
 
           return (
             <div key={type}>
