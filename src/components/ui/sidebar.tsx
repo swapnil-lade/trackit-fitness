@@ -2,6 +2,7 @@
 "use client";
 import React, { type ReactNode } from 'react';
 import { cn } from "@/lib/utils"; // For className usage
+import { Slot } from "@radix-ui/react-slot"; // Import Slot
 
 // --- Minimal SidebarProvider ---
 export const SidebarProvider = ({ children, defaultOpen }: { children: ReactNode, defaultOpen?: boolean }) => {
@@ -46,9 +47,29 @@ export const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.HTMLAttribu
 );
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
-export const SidebarMenuButton = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean, isActive?: boolean, tooltip?: string }>(
-  ({ className, children, ...props }, ref) => <button ref={ref} className={cn("minimal-sidebar-menu-button", className)} {...props}>{children}</button>
-);
+export const SidebarMenuButton = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    asChild?: boolean;
+    isActive?: boolean;
+    tooltip?: string;
+  }
+>(({ className, children, asChild = false, isActive, tooltip, ...buttonProps }, ref) => {
+  const Comp = asChild ? Slot : "button";
+  return (
+    <Comp
+      ref={ref}
+      className={cn("minimal-sidebar-menu-button", className, {
+        // Example for conditional styling if 'isActive' prop was intended for it:
+        // 'bg-accent text-accent-foreground': isActive,
+      })}
+      title={tooltip} // Use tooltip for the standard HTML title attribute
+      {...buttonProps} // Spread only the remaining standard button attributes
+    >
+      {children}
+    </Comp>
+  );
+});
 SidebarMenuButton.displayName = "SidebarMenuButton";
 
 export const SidebarMenuBadge = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -145,6 +166,3 @@ export const SidebarMenuSubButton = React.forwardRef<HTMLAnchorElement, React.An
   (props, ref) => <a ref={ref} {...props} />
 );
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton";
-
-
-    
