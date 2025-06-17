@@ -1,60 +1,106 @@
 
 "use client";
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { cn } from "@/lib/utils";
 import { Slot } from "@radix-ui/react-slot";
+import { useIsMobile } from '@/hooks/use-mobile'; // Assuming this hook is correct
 
-// --- Minimal SidebarProvider ---
-// SidebarProvider is currently removed from layout.tsx for debugging,
-// but we keep its definition here in case it's restored later.
-export const SidebarProvider = ({ children, defaultOpen }: { children: ReactNode, defaultOpen?: boolean }) => {
-  // In a real scenario, this would use React.Context to provide state
-  const [isMobile, setIsMobile] = React.useState(false); // Mock state
-  const [open, setOpen] = React.useState(defaultOpen ?? false);
-  const [openMobile, setOpenMobile] = React.useState(false);
+// Define the shape of the context state
+interface SidebarContextType {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  openMobile: boolean;
+  setOpenMobile: React.Dispatch<React.SetStateAction<boolean>>;
+  isMobile: boolean;
+  toggleSidebar: () => void;
+  isCollapsed: boolean; // Add isCollapsed if needed based on 'collapsible' prop
+  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>; // Add setIsCollapsed
+}
 
-  // Mock effect for mobile detection
-  React.useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+// Create the context with a default undefined value to catch misuse
+const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
-  const value = React.useMemo(() => ({
-    open,
-    setOpen,
+export const SidebarProvider = ({ children, defaultOpen = false }: { children: ReactNode, defaultOpen?: boolean }) => {
+  const isMobile = useIsMobile();
+  const [open, setOpen] = useState(defaultOpen);
+  const [openMobile, setOpenMobile] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(!defaultOpen); // Example state for collapsible
+
+  // Adjust open state based on isMobile and openMobile
+  useEffect(() => {
+    if (isMobile) {
+      setOpen(false); // Collapse sidebar on mobile by default or manage via openMobile
+    }
+  }, [isMobile]);
+
+  const toggleSidebar = () => {
+    if (isMobile) {
+      setOpenMobile(prev => !prev);
+    } else {
+      setOpen(prev => !prev);
+      setIsCollapsed(prev => !prev);
+    }
+  };
+  
+  // Memoize the context value
+  const value = useMemo(() => ({
+    open: isMobile ? openMobile : open, // Derive open state based on mobile
+    setOpen: isMobile ? setOpenMobile : setOpen,
     openMobile,
     setOpenMobile,
     isMobile,
-    toggleSidebar: () => setOpen(prev => !prev), // Basic toggle
-  }), [open, openMobile, isMobile]);
-  
-  // This is where you would use React.createContext and Provider
-  // For now, just wrapping children. Replace with actual context logic.
-  // Example: return <ActualSidebarContext.Provider value={value}>{children}</ActualSidebarContext.Provider>;
-  return <div data-testid="sidebar-provider">{children}</div>;
+    toggleSidebar,
+    isCollapsed, // Provide isCollapsed
+    setIsCollapsed, // Provide setIsCollapsed
+  }), [open, setOpen, openMobile, setOpenMobile, isMobile, isCollapsed, setIsCollapsed]);
+
+  return (
+    <SidebarContext.Provider value={value}>
+      {children}
+    </SidebarContext.Provider>
+  );
 };
 SidebarProvider.displayName = "SidebarProvider";
 
+export const useSidebar = () => {
+  const context = useContext(SidebarContext);
+  if (context === undefined) {
+    throw new Error("useSidebar must be used within a SidebarProvider");
+  }
+  return context;
+};
+
 // --- Minimal Stubs for other imported components ---
-export const Sidebar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { variant?: string, collapsible?: string }>(
-  ({ className, children, variant, collapsible, ...props }, ref) => (
-    <aside 
-      ref={ref} 
-      className={cn("minimal-sidebar", className)} 
-      data-variant={variant}
-      data-collapsible={collapsible}
-      {...props}
-    >
-      {children}
-    </aside>
-  )
+// (Keeping the stubs as they were, focusing on Provider/Hook fix)
+export const Sidebar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { variant?: string, collapsible?: string, open?: boolean, onOpenChange?: (open: boolean) => void }>(
+  ({ className, children, variant, collapsible, open: controlledOpen, onOpenChange, ...props }, ref) => {
+    const { isMobile, openMobile, open: contextOpen, isCollapsed } = useSidebar();
+    const currentOpen = controlledOpen !== undefined ? controlledOpen : (isMobile ? openMobile : contextOpen);
+    
+    return (
+      <aside
+        ref={ref}
+        className={cn("minimal-sidebar transition-all duration-300 ease-in-out", className, {
+            // Example: "md:w-64": currentOpen && !isCollapsed && !isMobile,
+            // "md:w-20": isCollapsed && !isMobile,
+            // "w-64": currentOpen && isMobile, // Mobile open width
+            // "w-0 hidden": !currentOpen && isMobile, // Mobile closed
+        })}
+        data-variant={variant}
+        data-collapsible={collapsible}
+        data-collapsed={collapsible === 'icon' && !isMobile ? isCollapsed : undefined}
+        aria-hidden={isMobile && !openMobile}
+        {...props}
+      >
+        {children}
+      </aside>
+    );
+  }
 );
 Sidebar.displayName = "Sidebar";
 
 export const SidebarHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => <header ref={ref} className={cn("minimal-sidebar-header", className)} {...props}>{children}</header>
+  ({ className, children, ...props }, ref) => <header ref={ref} className={cn("minimal-sidebar-header group", className)} {...props}>{children}</header>
 );
 SidebarHeader.displayName = "SidebarHeader";
 
@@ -64,34 +110,29 @@ export const SidebarContent = React.forwardRef<HTMLDivElement, React.HTMLAttribu
 SidebarContent.displayName = "SidebarContent";
 
 export const SidebarFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => <footer ref={ref} className={cn("minimal-sidebar-footer", className)} {...props}>{children}</footer>
+  ({ className, children, ...props }, ref) => <footer ref={ref} className={cn("minimal-sidebar-footer group", className)} {...props}>{children}</footer>
 );
 SidebarFooter.displayName = "SidebarFooter";
+
 
 export const SidebarTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }
 >(({ className, children, asChild = false, ...props }, ref) => {
   if (asChild) {
-    // When asChild is true, props (including any className passed to SidebarTrigger)
-    // are passed to Slot, which forwards them to the child.
-    // We don't apply "minimal-sidebar-trigger" directly to Slot.
     return (
       <Slot ref={ref} {...props}>
         {children}
       </Slot>
     );
   }
-
-  // When asChild is false, render a button and apply our specific classes
-  // merged with any className passed to SidebarTrigger.
   return (
     <button
       ref={ref}
       className={cn("minimal-sidebar-trigger", className)}
       {...props}
     >
-      {children || "Trigger"} {/* Default content if no children and not asChild */}
+      {children || "Trigger"}
     </button>
   );
 });
@@ -108,36 +149,35 @@ export const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.HTMLAttribu
 );
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
+
 export const SidebarMenuButton = React.forwardRef<
-  HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  HTMLButtonElement, // Can be HTMLAnchorElement if asChild points to Link
+  React.HTMLAttributes<HTMLButtonElement | HTMLAnchorElement> & { // Broaden type for props
     asChild?: boolean;
     isActive?: boolean;
     tooltip?: string;
   }
 >(({ className, children, asChild = false, isActive, tooltip, ...buttonProps }, ref) => {
   const Comp = asChild ? Slot : "button";
-  // Remove custom props not meant for the DOM element if Comp is 'button'
+  
   const { 
-    // Ensure these props are not passed to the DOM element if it's a button
     asChild: _asChild, 
     isActive: _isActive, 
     tooltip: _tooltip, 
-    ...restButtonProps 
+    ...domProps 
   } = buttonProps as any;
 
-  // Use restButtonProps if Comp is 'button', otherwise use the original buttonProps for Slot
-  const domProps = Comp === 'button' ? restButtonProps : buttonProps;
-
+  const finalProps = Comp === 'button' ? domProps : buttonProps;
 
   return (
     <Comp
       ref={ref}
-      className={cn("minimal-sidebar-menu-button", className, {
-        // 'bg-accent text-accent-foreground': isActive, // Example for conditional styling
+      className={cn("minimal-sidebar-menu-button w-full flex items-center justify-start group-data-[collapsible=icon]:justify-center text-sm px-3 py-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground", 
+        className, {
+        'bg-sidebar-accent text-sidebar-accent-foreground': isActive,
       })}
-      title={tooltip} // Use tooltip for the standard HTML title attribute
-      {...domProps}
+      title={tooltip}
+      {...finalProps}
     >
       {children}
     </Comp>
@@ -145,8 +185,9 @@ export const SidebarMenuButton = React.forwardRef<
 });
 SidebarMenuButton.displayName = "SidebarMenuButton";
 
+
 export const SidebarMenuBadge = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => <div ref={ref} className={cn("minimal-sidebar-menu-badge", className)} {...props}>{children}</div>
+  ({ className, children, ...props }, ref) => <div ref={ref} className={cn("minimal-sidebar-menu-badge ml-auto group-data-[collapsible=icon]:hidden", className)} {...props}>{children}</div>
 );
 SidebarMenuBadge.displayName = "SidebarMenuBadge";
 
@@ -156,31 +197,14 @@ export const SidebarSeparator = React.forwardRef<HTMLHRElement, React.HTMLAttrib
 SidebarSeparator.displayName = "SidebarSeparator";
 
 export const SidebarInset = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => <main ref={ref} className={cn("minimal-sidebar-inset", className)} {...props}>{children}</main>
+  ({ className, children, ...props }, ref) => <main ref={ref} className={cn("minimal-sidebar-inset md:pl-[var(--sidebar-width,0px)] transition-[padding-left]", className)} {...props}>{children}</main>
 );
 SidebarInset.displayName = "SidebarInset";
+
 
 // Stubs for other potentially exported components if they were in the original file
 // and are not already covered. These are minimal and may need adjustment
 // if they have specific props like 'asChild'.
-
-export const useSidebar = () => {
-  // This would typically come from React.useContext(ActualSidebarContext)
-  // Mocking the return value for now.
-  const context = React.useContext(null as any); // Replace null with your actual context
-  if (context) return context;
-
-  // Fallback mock if context isn't set up (as in this stubbed provider)
-  return {
-    state: "expanded", // "expanded" | "collapsed"
-    open: true,
-    setOpen: () => {},
-    openMobile: false,
-    setOpenMobile: () => {},
-    isMobile: false,
-    toggleSidebar: () => {},
-  };
-};
 
 export const SidebarRail = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
   (props, ref) => <button ref={ref} {...props} />
@@ -237,3 +261,17 @@ export const SidebarMenuSubButton = React.forwardRef<HTMLAnchorElement, React.An
   (props, ref) => <a ref={ref} {...props} />
 );
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton";
+
+interface SidebarContextValue {
+  collapsible?: "icon" | "rail";
+  collapsed?: boolean;
+  onCollapse?: (collapsed: boolean) => void;
+  mobile?: boolean;
+  mobileOpen?: boolean;
+  onMobileOpen?: (open: boolean) => void;
+  fullWidth?: boolean;
+}
+const _SidebarContext = React.createContext<SidebarContextValue | null>(null);
+
+export { _SidebarContext as ActualSidebarContext }; // Exporting for potential use elsewhere if needed
+

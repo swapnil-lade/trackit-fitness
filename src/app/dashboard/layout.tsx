@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { Logo } from "@/components/icons/logo";
 import { Button } from "@/components/ui/button";
 import {
-  SidebarProvider, // Re-added SidebarProvider
+  SidebarProvider,
   Sidebar,
   SidebarHeader,
   SidebarContent,
@@ -19,13 +19,13 @@ import {
   SidebarMenuBadge,
   SidebarSeparator,
   SidebarInset,
-  useSidebar, // Added useSidebar
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { DASHBOARD_NAV_LINKS, DASHBOARD_SETTINGS_LINKS, type NavLink } from "@/lib/constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { LucideIcon } from "lucide-react";
-import { DashboardNavbar } from "@/components/layout/dashboard-navbar"; // Import new Navbar
+import { DashboardNavbar } from "@/components/layout/dashboard-navbar"; 
 
 export default function DashboardLayout({
   children,
@@ -33,7 +33,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { open: sidebarOpen, setOpen: setSidebarOpen } = useSidebar(); // Get sidebar state
+  // Note: useSidebar() is called within SidebarProvider, so this specific call might be redundant
+  // or needs to be used carefully if layout itself is not a child of another SidebarProvider.
+  // For now, assuming it's okay as SidebarProvider wraps the content below.
+  // const { open: sidebarOpen, setOpen: setSidebarOpen } = useSidebar(); 
 
   const renderNavLinks = (links: NavLink[]) =>
     links.map((link) => (
@@ -42,13 +45,13 @@ export default function DashboardLayout({
           asChild
           isActive={pathname === link.href}
           tooltip={link.label}
-          // onClick={() => sidebarOpen && setSidebarOpen(false)} // Close sidebar on mobile click
+          // onClick={() => sidebarOpen && !isMobile && setSidebarOpen(false)} // Example: Close sidebar on mobile click
         >
           <Link href={link.href}>
             <link.icon />
-            <span>{link.label}</span>
+            <span className="group-data-[collapsible=icon]:hidden">{link.label}</span>
             {link.label === "AI Suggestions" && (
-              <SidebarMenuBadge className="bg-primary/20 text-primary">New</SidebarMenuBadge>
+              <SidebarMenuBadge className="bg-primary/20 text-primary group-data-[collapsible=icon]:hidden">New</SidebarMenuBadge>
             )}
           </Link>
         </SidebarMenuButton>
@@ -59,14 +62,12 @@ export default function DashboardLayout({
   const LogoutIcon = logoutLinkConfig ? logoutLinkConfig.icon : null;
 
   return (
-    <SidebarProvider defaultOpen> {/* Restored SidebarProvider */}
+    <SidebarProvider defaultOpen> {/* Ensure SidebarProvider wraps components that use useSidebar */}
       <div className="flex min-h-screen w-full">
         <Sidebar 
             variant="sidebar" 
             collapsible="icon" 
-            className="border-r bg-sidebar text-sidebar-foreground data-[collapsed=true]:hidden md:data-[collapsed=true]:flex" // classes for collapse behavior
-            // open={sidebarOpen} // Control open state
-            // onOpenChange={setSidebarOpen} // Control open state change
+            className="border-r bg-sidebar text-sidebar-foreground data-[collapsed=true]:hidden md:data-[collapsed=true]:flex fixed h-full z-40 md:sticky" // classes for collapse behavior
         >
           <SidebarHeader className="p-4">
             <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
@@ -74,21 +75,24 @@ export default function DashboardLayout({
               <span className="font-bold text-lg font-headline group-data-[collapsible=icon]:hidden">Trackit</span>
             </Link>
           </SidebarHeader>
-          <ScrollArea className="h-[calc(100vh-var(--sidebar-header-h)-var(--sidebar-footer-h)-theme(spacing.8))]">
+          {/* Adjust height calculation for scroll area if header/footer heights change */}
+          <ScrollArea className="h-[calc(100vh-theme(spacing.16)-theme(spacing.16)-theme(spacing.8))]"> {/* Approximation */}
             <SidebarContent className="p-2 flex-1">
               <SidebarMenu>{renderNavLinks(DASHBOARD_NAV_LINKS)}</SidebarMenu>
             </SidebarContent>
           </ScrollArea>
           <SidebarFooter className="p-2">
             <SidebarSeparator className="my-2" />
+            {/* Profile and Settings links are now in the navbar dropdown */}
+            {/* Filtered out Profile and Settings for direct sidebar rendering */}
             <SidebarMenu>{renderNavLinks(DASHBOARD_SETTINGS_LINKS.filter(link => link.label !== 'Logout' && link.label !== 'Profile' && link.label !== 'Settings'))}</SidebarMenu>
-            {/* Profile and Settings links are now in the navbar dropdown, Logout can stay or be removed */}
+            
             {logoutLinkConfig && LogoutIcon && (
                <SidebarMenuItem>
                  <SidebarMenuButton asChild tooltip="Logout">
                     <Link href={logoutLinkConfig.href}>
                       <LogoutIcon />
-                      <span>Logout</span>
+                      <span className="group-data-[collapsible=icon]:hidden">Logout</span>
                     </Link>
                  </SidebarMenuButton>
                </SidebarMenuItem>
@@ -106,9 +110,9 @@ export default function DashboardLayout({
             </div>
           </SidebarFooter>
         </Sidebar>
-        <SidebarInset className="flex flex-col flex-1"> {/* Applied flex-1 here */}
-          <DashboardNavbar /> {/* Use the new DashboardNavbar */}
-          <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8 bg-background"> {/* Main content takes remaining space */}
+        <SidebarInset className="flex flex-col flex-1">
+          <DashboardNavbar />
+          <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8 bg-background">
             {children}
           </main>
         </SidebarInset>

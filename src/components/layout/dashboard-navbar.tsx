@@ -16,34 +16,37 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DASHBOARD_SETTINGS_LINKS } from "@/lib/constants";
 import type { LucideIcon } from "lucide-react";
-import { Menu } from "lucide-react"; // For mobile trigger, consistent with landing navbar
+import { Menu } from "lucide-react";
 
 export function DashboardNavbar() {
-  const { toggleSidebar, openMobile, setOpenMobile } = useSidebar(); // Assuming useSidebar provides these
+  const { toggleSidebar, openMobile, setOpenMobile, isMobile } = useSidebar();
 
-  // Find logout icon
   const logoutLinkConfig = DASHBOARD_SETTINGS_LINKS.find(l => l.label === 'Logout');
   const LogoutIcon = logoutLinkConfig ? logoutLinkConfig.icon : null;
   
-  // Find profile icon
   const profileLinkConfig = DASHBOARD_SETTINGS_LINKS.find(l => l.label === 'Profile');
   const ProfileIcon = profileLinkConfig ? profileLinkConfig.icon : null;
 
-  // Find settings icon
   const settingsLinkConfig = DASHBOARD_SETTINGS_LINKS.find(l => l.label === 'Settings');
   const SettingsIcon = settingsLinkConfig ? settingsLinkConfig.icon : null;
 
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-      <div className="md:hidden">
-        <SidebarTrigger asChild>
-          <Button size="icon" variant="outline" onClick={() => setOpenMobile(!openMobile)}>
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+      {/* Mobile sidebar trigger: only shown on mobile, triggers full sidebar */}
+      {isMobile && (
+         <Button size="icon" variant="outline" onClick={toggleSidebar} aria-label="Toggle mobile menu">
             <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
+         </Button>
+      )}
+      {/* Desktop sidebar trigger: only shown on non-mobile, triggers collapse/expand */}
+      {!isMobile && (
+        <SidebarTrigger asChild>
+          <Button size="icon" variant="outline" onClick={toggleSidebar} aria-label="Toggle sidebar">
+            <Menu className="h-5 w-5" />
           </Button>
         </SidebarTrigger>
-      </div>
+      )}
       
       <div className="ml-auto flex items-center gap-4">
         <DropdownMenu>
@@ -84,7 +87,7 @@ export function DashboardNavbar() {
             <DropdownMenuSeparator />
             {logoutLinkConfig && LogoutIcon && (
                  <DropdownMenuItem asChild>
-                    <Link href={logoutLinkConfig.href}> {/* Actual logout logic would go here */}
+                    <Link href={logoutLinkConfig.href}>
                         <LogoutIcon className="mr-2 h-4 w-4" />
                         <span>{logoutLinkConfig.label}</span>
                     </Link>
