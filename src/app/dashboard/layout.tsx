@@ -34,7 +34,6 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
 
-
   const renderNavLinks = (links: NavLink[]) =>
     links.map((link) => (
       <SidebarMenuItem key={link.label}>
@@ -68,10 +67,9 @@ export default function DashboardLayout({
           <SidebarHeader className="p-4">
             <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
               <Logo className="h-8 w-auto text-primary group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7" />
-              
             </Link>
           </SidebarHeader>
-          <SidebarContent className="p-2 flex-1 flex flex-col"> {/* Added flex flex-col */}
+          <SidebarContent className="p-2 flex-1 flex flex-col">
             <ScrollArea className="h-full"> 
               <SidebarMenu>{renderNavLinks(DASHBOARD_NAV_LINKS)}</SidebarMenu>
             </ScrollArea>
