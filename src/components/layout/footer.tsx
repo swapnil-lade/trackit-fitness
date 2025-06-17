@@ -11,14 +11,14 @@ export function Footer() {
               <Logo className="h-8 w-auto" />
             </Link>
             <p className="text-sm text-muted-foreground">
-              Your fitness journey, simplified. Track, plan, and achieve your goals with AI-powered insights.
+              Your fitness journey, simplified. Track, plan, and achieve your goals.
             </p>
           </div>
           <div>
             <h4 className="font-headline font-semibold mb-3">Quick Links</h4>
             <ul className="space-y-2 text-sm">
               <li><Link href="#features" className="hover:text-primary transition-colors">Features</Link></li>
-              <li><Link href="#pricing" className="hover:text-primary transition-colors">Pricing</Link></li>
+              {/* <li><Link href="#pricing" className="hover:text-primary transition-colors">Pricing</Link></li> */} {/* Removed Pricing link */}
               <li><Link href="/login" className="hover:text-primary transition-colors">Login</Link></li>
               <li><Link href="/register" className="hover:text-primary transition-colors">Sign Up</Link></li>
             </ul>

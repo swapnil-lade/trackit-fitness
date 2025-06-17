@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const navLinks = [
   { href: '#features', label: 'Features' },
-  { href: '#pricing', label: 'Pricing' },
+  // { href: '#pricing', label: 'Pricing' }, // Removed Pricing link
 ];
 
 export function Navbar() {
