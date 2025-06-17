@@ -8,8 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Bell, UserCircle, ShieldCheck, Palette, LogOut } from "lucide-react";
+import { useState } from "react";
 
 export default function SettingsPage() {
+  // In a real app, these would be tied to user state/API
+  const [fullName, setFullName] = useState(""); 
+  const [email, setEmail] = useState("");
+  const [bio, setBio] = useState("");
+
   return (
     <div className="space-y-8">
       <div>
@@ -26,16 +32,16 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="name">Full Name</Label>
-              <Input id="name" defaultValue="John Doe" />
+              <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your Full Name" />
             </div>
             <div>
               <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" defaultValue="john.doe@example.com" />
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" />
             </div>
           </div>
           <div>
             <Label htmlFor="bio">Bio</Label>
-            <Input id="bio" placeholder="Tell us a bit about yourself" />
+            <Input id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell us a bit about yourself" />
           </div>
           <Button>Save Profile</Button>
         </CardContent>

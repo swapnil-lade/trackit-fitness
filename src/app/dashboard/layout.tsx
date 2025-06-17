@@ -42,9 +42,7 @@ export default function DashboardLayout({
           <Link href={link.href}>
             <link.icon />
             <span className="group-data-[collapsible=icon]:group-data-[collapsed=true]:hidden">{link.label}</span>
-            {link.label === "AI Suggestions" && (
-              <SidebarMenuBadge className="bg-primary/20 text-primary group-data-[collapsible=icon]:group-data-[collapsed=true]:hidden">New</SidebarMenuBadge>
-            )}
+            {/* Removed AI Suggestions Badge as AI features were removed */}
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -55,7 +53,7 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen w-full"> {/* Removed bg-sidebar here */}
+      <div className="flex min-h-screen w-full">
         <Sidebar 
             variant="sidebar" 
             collapsible="icon"
@@ -65,7 +63,7 @@ export default function DashboardLayout({
               <Logo className="h-8 w-auto text-primary group-data-[collapsible=icon]:group-data-[collapsed=true]:h-7 group-data-[collapsible=icon]:group-data-[collapsed=true]:w-7" />
             </Link>
           </SidebarHeader>
-          <SidebarContent className="p-2"> 
+          <SidebarContent className="p-2 flex flex-col"> 
             <ScrollArea className="flex-1"> 
               <SidebarMenu>{renderNavLinks(DASHBOARD_NAV_LINKS)}</SidebarMenu>
             </ScrollArea>
@@ -88,11 +86,11 @@ export default function DashboardLayout({
             <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:group-data-[collapsed=true]:justify-center">
               <Avatar className="h-9 w-9 group-data-[collapsible=icon]:group-data-[collapsed=true]:h-7 group-data-[collapsible=icon]:group-data-[collapsed=true]:w-7">
                 <AvatarImage src="https://placehold.co/100x100.png" alt="User Avatar" data-ai-hint="user avatar"/>
-                <AvatarFallback>JD</AvatarFallback>
+                <AvatarFallback>U</AvatarFallback>
               </Avatar>
               <div className="group-data-[collapsible=icon]:group-data-[collapsed=true]:hidden">
-                <p className="text-sm font-medium">John Doe</p>
-                <p className="text-xs text-muted-foreground">john.doe@example.com</p>
+                <p className="text-sm font-medium">User</p>
+                <p className="text-xs text-muted-foreground">user@example.com</p>
               </div>
             </div>
           </SidebarFooter>

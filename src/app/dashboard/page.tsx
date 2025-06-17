@@ -12,20 +12,20 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLe
 import { Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Pie, PieChart as RechartsPieChart, Cell, LineChart } from "recharts";
 import React, { useState, useEffect } from "react";
 
-const dailyProgressData = [
-  { day: "Mon", calories: 2200, steps: 8000, workout: 60 },
-  { day: "Tue", calories: 2000, steps: 7500, workout: 0 },
-  { day: "Wed", calories: 2500, steps: 10000, workout: 75 },
-  { day: "Thu", calories: 2300, steps: 9000, workout: 45 },
-  { day: "Fri", calories: 2600, steps: 12000, workout: 90 },
-  { day: "Sat", calories: 2800, steps: 15000, workout: 120 },
-  { day: "Sun", calories: 2100, steps: 6000, workout: 0 },
+const initialDailyProgressData = [
+  { day: "Mon", calories: 0, steps: 0, workout: 0 },
+  { day: "Tue", calories: 0, steps: 0, workout: 0 },
+  { day: "Wed", calories: 0, steps: 0, workout: 0 },
+  { day: "Thu", calories: 0, steps: 0, workout: 0 },
+  { day: "Fri", calories: 0, steps: 0, workout: 0 },
+  { day: "Sat", calories: 0, steps: 0, workout: 0 },
+  { day: "Sun", calories: 0, steps: 0, workout: 0 },
 ];
 
-const macroData = [
-  { name: 'Protein', value: 150, target: 160, fill: 'hsl(var(--chart-1))' },
-  { name: 'Carbs', value: 200, target: 250, fill: 'hsl(var(--chart-2))' },
-  { name: 'Fat', value: 60, target: 70, fill: 'hsl(var(--chart-3))' },
+const initialMacroData = [
+  { name: 'Protein', value: 0, target: 160, fill: 'hsl(var(--chart-1))' },
+  { name: 'Carbs', value: 0, target: 250, fill: 'hsl(var(--chart-2))' },
+  { name: 'Fat', value: 0, target: 70, fill: 'hsl(var(--chart-3))' },
 ];
 const chartConfig = {
   calories: { label: "Calories", color: "hsl(var(--chart-1))" },
@@ -36,6 +36,9 @@ const chartConfig = {
 export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [greeting, setGreeting] = useState("Good Morning");
+  const [dailyProgressData, setDailyProgressData] = useState(initialDailyProgressData);
+  const [macroData, setMacroData] = useState(initialMacroData);
+
 
   useEffect(() => {
     const currentHour = new Date().getHours();
@@ -52,7 +55,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <div>
-          <h1 className="text-3xl font-headline font-bold">{greeting}, John!</h1>
+          <h1 className="text-3xl font-headline font-bold">{greeting}, User!</h1>
           <p className="text-muted-foreground">Here's your fitness snapshot for today.</p>
         </div>
         <Button asChild className="mt-4 sm:mt-0">
@@ -107,7 +110,7 @@ export default function DashboardPage() {
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="font-headline flex items-center">
-              <CalendarDays className="h-6 w-6 mr-2 text-primary" /> Calendar
+              <CalendarDays className="h-6 w-6 mr-2 text-primary" /> Calendar 
             </CardTitle>
             <CardDescription>Your upcoming events and logged activities.</CardDescription>
           </CardHeader>
@@ -151,7 +154,7 @@ export default function DashboardPage() {
                     <span className="text-sm font-medium">{macro.name}</span>
                     <span className="text-sm text-muted-foreground">{macro.value}g / {macro.target}g</span>
                   </div>
-                  <Progress value={(macro.value / macro.target) * 100} className="h-2 [&>div]:bg-[var(--chart-color)]"
+                  <Progress value={(macro.target > 0 ? (macro.value / macro.target) * 100 : 0)} className="h-2 [&>div]:bg-[var(--chart-color)]"
                   style={{'--chart-color': macro.fill} as React.CSSProperties}
                   />
                 </div>

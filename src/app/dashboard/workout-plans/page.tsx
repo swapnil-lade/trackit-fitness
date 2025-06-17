@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, Edit3, Trash2, Dumbbell, CalendarDays, Target, Repeat, Clock, Eye } from "lucide-react";
-import { SAMPLE_WORKOUT_PLANS, WORKOUT_EXERCISES_SAMPLE } from '@/lib/constants';
+// import { SAMPLE_WORKOUT_PLANS, WORKOUT_EXERCISES_SAMPLE } from '@/lib/constants'; // No longer using for initial state
 import { Badge } from '@/components/ui/badge';
 
 interface Exercise {
@@ -31,7 +31,7 @@ interface WorkoutPlan {
 }
 
 export default function WorkoutPlansPage() {
-  const [plans, setPlans] = useState<WorkoutPlan[]>(SAMPLE_WORKOUT_PLANS.map(p => ({...p, daysPerWeek: p.days, exercises: [{day: 'Day 1', items: WORKOUT_EXERCISES_SAMPLE}]})));
+  const [plans, setPlans] = useState<WorkoutPlan[]>([]); // Initialize with empty array
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<WorkoutPlan | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -65,12 +65,13 @@ export default function WorkoutPlansPage() {
       setPlans(plans.map(p => p.id === currentPlan.id ? { ...p, name: planName, daysPerWeek, goal, description } : p));
     } else {
       const newPlan: WorkoutPlan = { 
-        id: `plan${plans.length + 1}`, 
+        id: `plan${Date.now()}`, 
         name: planName, 
         daysPerWeek, 
         goal, 
         description,
-        exercises: [{day: 'Day 1', items: []}] // Initialize with one day
+        // Initialize with a structure for exercises, e.g., for each day up to daysPerWeek
+        exercises: Array.from({ length: daysPerWeek }, (_, i) => ({ day: `Day ${i + 1}`, items: [] }))
       };
       setPlans([...plans, newPlan]);
     }
@@ -158,7 +159,7 @@ export default function WorkoutPlansPage() {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="daysPerWeek" className="text-right">Days/Week</Label>
-              <Input id="daysPerWeek" type="number" value={daysPerWeek} onChange={(e) => setDaysPerWeek(parseInt(e.target.value))} className="col-span-3" />
+              <Input id="daysPerWeek" type="number" value={daysPerWeek} onChange={(e) => setDaysPerWeek(parseInt(e.target.value))} className="col-span-3" min="1" max="7" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="goal" className="text-right">Goal</Label>
@@ -223,6 +224,9 @@ export default function WorkoutPlansPage() {
                   </Button>
                 </div>
               ))}
+               {!viewingPlan.exercises || viewingPlan.exercises.length === 0 && (
+                <p className="text-sm text-muted-foreground">No exercise days defined for this plan yet.</p>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => { setIsViewModalOpen(false); setViewingPlan(null);}}>Close</Button>

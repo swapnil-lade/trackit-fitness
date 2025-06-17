@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { PlusCircle, Edit3, Trash2, Apple, Utensils, Droplets, Flame, PieChart as PieChartIcon } from "lucide-react";
-import { SAMPLE_MEALS } from '@/lib/constants';
+// import { SAMPLE_MEALS } from '@/lib/constants'; // No longer using for initial state
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { Bar, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Pie, PieChart as RechartsPieChart, Cell, Legend } from "recharts";
 
@@ -39,7 +39,7 @@ const chartConfig = {
 };
 
 export default function DietPlannerPage() {
-  const [loggedMeals, setLoggedMeals] = useState<Meal[]>(SAMPLE_MEALS);
+  const [loggedMeals, setLoggedMeals] = useState<Meal[]>([]); // Initialize with empty array
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentMeal, setCurrentMeal] = useState<Meal | null>(null);
 
@@ -92,7 +92,7 @@ export default function DietPlannerPage() {
     if (currentMeal) {
       setLoggedMeals(loggedMeals.map(m => m.id === currentMeal.id ? { ...m, ...mealData } : m));
     } else {
-      setLoggedMeals([...loggedMeals, { id: `meal${loggedMeals.length + 1}`, ...mealData }]);
+      setLoggedMeals([...loggedMeals, { id: `meal${Date.now()}`, ...mealData }]);
     }
     setIsModalOpen(false);
   };
@@ -130,7 +130,7 @@ export default function DietPlannerPage() {
                   <p className="text-xs text-muted-foreground">{dailyTotals.calories} kcal / {nutrientTargets.calories} kcal</p>
                 </div>
               </div>
-              <Progress value={(dailyTotals.calories / nutrientTargets.calories) * 100} className="w-1/3 h-2" />
+              <Progress value={(nutrientTargets.calories > 0 ? (dailyTotals.calories / nutrientTargets.calories) * 100 : 0)} className="w-1/3 h-2" />
             </div>
              {macroChartData.map(macro => (
               <div key={macro.name} className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
@@ -141,15 +141,15 @@ export default function DietPlannerPage() {
                     <p className="text-xs text-muted-foreground">{macro.value}g / {macro.target}g</p>
                    </div>
                  </div>
-                <Progress value={(macro.value / macro.target) * 100} className="w-1/3 h-2" style={{'--progress-color': macro.fill} as React.CSSProperties} />
+                <Progress value={(macro.target > 0 ? (macro.value / macro.target) * 100 : 0)} className="w-1/3 h-2" style={{'--progress-color': macro.fill} as React.CSSProperties} />
               </div>
             ))}
           </div>
           <ChartContainer config={chartConfig} className="h-[250px] w-full">
             <ResponsiveContainer>
               <RechartsPieChart>
-                <Pie data={macroChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                  {macroChartData.map((entry, index) => (
+                <Pie data={macroChartData.filter(m => m.value > 0)} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                  {macroChartData.filter(m => m.value > 0).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
@@ -173,7 +173,7 @@ export default function DietPlannerPage() {
             <div key={type}>
               <h3 className="text-xl font-headline font-medium mb-2 border-b pb-1">{type}</h3>
               {mealsOfType.length === 0 ? (
-                 <p className="text-sm text-muted-foreground py-4 text-center">No {type.toLowerCase()} logged yet. <Button variant="link" size="sm" onClick={() => handleOpenModal()} className="p-0 h-auto">Log one now?</Button></p>
+                 <p className="text-sm text-muted-foreground py-4 text-center">No {type.toLowerCase()} logged yet. <Button variant="link" size="sm" onClick={() => { handleOpenModal(); setMealType(type); }} className="p-0 h-auto">Log one now?</Button></p>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {mealsOfType.map((meal) => (
@@ -271,11 +271,4 @@ export default function DietPlannerPage() {
     </div>
   );
 }
-
-// CSS-in-JS for progress bar color - a bit of a hack for dynamic colors based on HSL vars
-// If shadcn/ui Progress doesn't support dynamic coloring easily, this could be one way.
-// However, using inline style with CSS variables is preferred.
-// Make sure --progress-color is defined or handled by Progress component if this approach is chosen.
-// For now, the inline style with CSS variable is used on the Progress component itself.
-
     
