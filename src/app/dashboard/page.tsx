@@ -172,7 +172,7 @@ export default function DashboardPage() {
             <Button variant="outline" asChild><Link href="/dashboard/workout-plans/new">Log Workout</Link></Button>
             <Button variant="outline" asChild><Link href="/dashboard/diet-planner">Log Meal</Link></Button>
             <Button variant="outline" asChild><Link href="/dashboard/workout-plans">View Plans</Link></Button>
-            <Button variant="outline" asChild><Link href="/dashboard/ai-suggestions">Get AI Tips</Link></Button>
+            <Button variant="outline" asChild><Link href="/dashboard/daily-schedule">View Schedule</Link></Button>
           </CardContent>
         </Card>
       </div>

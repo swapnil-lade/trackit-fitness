@@ -3,7 +3,6 @@ import {
   Dumbbell,
   Apple,
   CalendarDays,
-  Brain,
   Settings,
   LogOut,
   UserCircle,
@@ -29,7 +28,6 @@ export const DASHBOARD_NAV_LINKS: NavLink[] = [
   { href: '/dashboard/workout-plans', label: 'Workout Plans', icon: Dumbbell },
   { href: '/dashboard/diet-planner', label: 'Diet Planner', icon: Apple },
   { href: '/dashboard/daily-schedule', label: 'Daily Schedule', icon: CalendarDays },
-  { href: '/dashboard/ai-suggestions', label: 'AI Suggestions', icon: Brain },
 ];
 
 export const DASHBOARD_SETTINGS_LINKS: NavLink[] = [
