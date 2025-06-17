@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import { Logo } from "@/components/icons/logo";
 import { Button } from "@/components/ui/button";
 import {
-  SidebarProvider,
   Sidebar,
   SidebarHeader,
   SidebarContent,
@@ -19,10 +18,11 @@ import {
   SidebarMenuBadge,
   SidebarSeparator,
   SidebarInset,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/sidebar"; // SidebarProvider is intentionally not imported here based on previous step
 import { DASHBOARD_NAV_LINKS, DASHBOARD_SETTINGS_LINKS, type NavLink } from "@/lib/constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import type { LucideIcon } from "lucide-react"; // For LogoutIcon type, though it's implicitly handled
 
 export default function DashboardLayout({
   children,
@@ -50,8 +50,12 @@ export default function DashboardLayout({
       </SidebarMenuItem>
     ));
 
+  // Pre-fetch the Logout icon component
+  const logoutLinkConfig = DASHBOARD_SETTINGS_LINKS.find(l => l.label === 'Logout');
+  const LogoutIcon = logoutLinkConfig ? logoutLinkConfig.icon : null; // Default to null or a fallback icon if needed
+
   return (
-    <SidebarProvider defaultOpen>
+    <> {/* SidebarProvider was removed here in a previous debugging step */}
       <Sidebar variant="sidebar" collapsible="icon" className="border-r">
         <SidebarHeader className="p-4">
           <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
@@ -70,7 +74,7 @@ export default function DashboardLayout({
            <SidebarMenuItem>
              <SidebarMenuButton asChild tooltip="Logout">
                 <Link href="/login"> {/* Actual logout logic would go here */}
-                  <DASHBOARD_SETTINGS_LINKS.find(l => l.label === 'Logout')!.icon />
+                  {LogoutIcon && <LogoutIcon />} {/* Use the pre-fetched icon component */}
                   <span>Logout</span>
                 </Link>
              </SidebarMenuButton>
@@ -102,8 +106,6 @@ export default function DashboardLayout({
           {children}
         </main>
       </SidebarInset>
-    </SidebarProvider>
+    </>
   );
 }
-
-    
