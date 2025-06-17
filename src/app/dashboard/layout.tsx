@@ -58,7 +58,7 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider defaultOpen>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full bg-sidebar"> {/* Changed background here */}
         <Sidebar 
             variant="sidebar" 
             collapsible="icon" 
@@ -69,8 +69,8 @@ export default function DashboardLayout({
               <Logo className="h-8 w-auto text-primary group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7" />
             </Link>
           </SidebarHeader>
-          <SidebarContent className="p-2 flex-1 flex flex-col">
-            <ScrollArea className="flex-1"> {/* Changed from h-full to flex-1 */}
+          <SidebarContent className="p-2 flex-1 flex flex-col"> {/* Ensures content area fills space */}
+            <ScrollArea className="flex-1"> {/* ScrollArea takes full height of SidebarContent */}
               <SidebarMenu>{renderNavLinks(DASHBOARD_NAV_LINKS)}</SidebarMenu>
             </ScrollArea>
           </SidebarContent>
@@ -103,7 +103,7 @@ export default function DashboardLayout({
         </Sidebar>
         <SidebarInset className="flex flex-col flex-1">
           <DashboardNavbar />
-          <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8 bg-background">
+          <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8 bg-background"> {/* Content has its own background */}
             {children}
           </main>
         </SidebarInset>
