@@ -1,12 +1,13 @@
 
 "use client";
 import React, { type ReactNode } from 'react';
-import { cn } from "@/lib/utils"; // For className usage
-import { Slot } from "@radix-ui/react-slot"; // Import Slot
+import { cn } from "@/lib/utils";
+import { Slot } from "@radix-ui/react-slot";
 
 // --- Minimal SidebarProvider ---
+// SidebarProvider is currently removed from layout.tsx for debugging,
+// but we keep its definition here in case it's restored later.
 export const SidebarProvider = ({ children, defaultOpen }: { children: ReactNode, defaultOpen?: boolean }) => {
-  // console.log("Minimal SidebarProvider rendered, defaultOpen:", defaultOpen);
   return <div data-testid="sidebar-provider">{children}</div>;
 };
 SidebarProvider.displayName = "SidebarProvider";
@@ -36,18 +37,31 @@ export const SidebarTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }
 >(({ className, children, asChild = false, ...props }, ref) => {
-  const Comp = asChild ? Slot : "button";
+  if (asChild) {
+    // When asChild is true, props (including any className passed to SidebarTrigger)
+    // are passed to Slot, which forwards them to the child.
+    // We don't apply "minimal-sidebar-trigger" directly to Slot.
+    return (
+      <Slot ref={ref} {...props}>
+        {children}
+      </Slot>
+    );
+  }
+
+  // When asChild is false, render a button and apply our specific classes
+  // merged with any className passed to SidebarTrigger.
   return (
-    <Comp
+    <button
       ref={ref}
       className={cn("minimal-sidebar-trigger", className)}
       {...props}
     >
-      {children || (!asChild && "Trigger")}
-    </Comp>
+      {children || "Trigger"} {/* Default content if no children and not asChild */}
+    </button>
   );
 });
 SidebarTrigger.displayName = "SidebarTrigger";
+
 
 export const SidebarMenu = React.forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLUListElement>>(
   ({ className, children, ...props }, ref) => <ul ref={ref} className={cn("minimal-sidebar-menu", className)} {...props}>{children}</ul>
@@ -68,20 +82,25 @@ export const SidebarMenuButton = React.forwardRef<
   }
 >(({ className, children, asChild = false, isActive, tooltip, ...buttonProps }, ref) => {
   const Comp = asChild ? Slot : "button";
-  // Remove isActive and tooltip from buttonProps if they are not standard HTML attributes for a button
-  // For this stub, we'll assume they are custom and only use tooltip for the title attribute.
-  const { isActive: _isActive, tooltip: _tooltip, ...restButtonProps } = buttonProps as any;
+  // Remove custom props not meant for the DOM element if Comp is 'button'
+  const { 
+    asChild: _asChild, 
+    isActive: _isActive, 
+    tooltip: _tooltip, 
+    ...restButtonProps 
+  } = buttonProps as any;
+
+  const domProps = Comp === 'button' ? restButtonProps : buttonProps;
 
 
   return (
     <Comp
       ref={ref}
       className={cn("minimal-sidebar-menu-button", className, {
-        // Example for conditional styling if 'isActive' prop was intended for it:
-        // 'bg-accent text-accent-foreground': isActive,
+        // 'bg-accent text-accent-foreground': isActive, // Example for conditional styling
       })}
       title={tooltip} // Use tooltip for the standard HTML title attribute
-      {...restButtonProps} // Spread only the remaining standard button attributes
+      {...domProps}
     >
       {children}
     </Comp>
@@ -94,8 +113,8 @@ export const SidebarMenuBadge = React.forwardRef<HTMLDivElement, React.HTMLAttri
 );
 SidebarMenuBadge.displayName = "SidebarMenuBadge";
 
-export const SidebarSeparator = React.forwardRef<HTMLHRElement, React.HTMLAttributes<HTMLHRElement>>( // Changed from Separator to hr for simplicity
-  ({ className, ...props }, ref) => <hr ref={ref} className={cn("minimal-sidebar-separator", className)} {...props} />
+export const SidebarSeparator = React.forwardRef<HTMLHRElement, React.HTMLAttributes<HTMLHRElement>>(
+  ({ className, ...props }, ref) => <hr ref={ref} className={cn("minimal-sidebar-separator my-2 border-sidebar-border", className)} {...props} />
 );
 SidebarSeparator.displayName = "SidebarSeparator";
 
@@ -104,9 +123,13 @@ export const SidebarInset = React.forwardRef<HTMLDivElement, React.HTMLAttribute
 );
 SidebarInset.displayName = "SidebarInset";
 
+// Stubs for other potentially exported components if they were in the original file
+// and are not already covered. These are minimal and may need adjustment
+// if they have specific props like 'asChild'.
+
 export const useSidebar = () => {
   return {
-    state: "expanded",
+    state: "expanded", // "expanded" | "collapsed"
     open: true,
     setOpen: () => {},
     openMobile: false,
@@ -146,6 +169,7 @@ export const SidebarGroupContent = React.forwardRef<HTMLDivElement, React.HTMLAt
 );
 SidebarGroupContent.displayName = "SidebarGroupContent";
 
+
 export const SidebarMenuAction = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
   (props, ref) => <button ref={ref} {...props} />
 );
@@ -166,7 +190,7 @@ export const SidebarMenuSubItem = React.forwardRef<HTMLLIElement, React.HTMLAttr
 );
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem";
 
-export const SidebarMenuSubButton = React.forwardRef<HTMLAnchorElement, React.AnchorHTMLAttributes<HTMLAnchorElement>>(
+export const SidebarMenuSubButton = React.forwardRef<HTMLAnchorElement, React.AnchorHTMLAttributes<HTMLAnchorElement>>( // Assuming it's an anchor
   (props, ref) => <a ref={ref} {...props} />
 );
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton";
