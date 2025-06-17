@@ -7,9 +7,9 @@ import { FITNESS_STATS_DATA } from "@/lib/constants";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { BarChart as LucideBarChart, LineChart as LucideLineChart, CheckSquare, PlusCircle } from 'lucide-react'; // Renamed to avoid conflict
+import { BarChart as LucideBarChart, LineChart as LucideLineChartIcon, CheckSquare, PlusCircle } from 'lucide-react'; // Renamed LineChart to avoid conflict
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Pie, PieChart, Cell, LineChart, BarChart } from "recharts"; // Added LineChart, BarChart here
+import { Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Pie, PieChart, Cell, LineChart } from "recharts"; // Added LineChart here
 import React, { useState, useEffect } from "react";
 
 const dailyProgressData = [
@@ -45,7 +45,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="container mx-auto space-y-6">
+    <div className="space-y-6"> {/* Removed container mx-auto */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <div>
           <h1 className="text-3xl font-headline font-bold">{greeting}, John!</h1>
@@ -79,7 +79,7 @@ export default function DashboardPage() {
         <Card className="lg:col-span-2 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="font-headline flex items-center">
-              <LucideBarChart className="h-6 w-6 mr-2 text-primary" /> Weekly Activity
+              <LucideLineChartIcon className="h-6 w-6 mr-2 text-primary" /> Weekly Activity {/* Changed to LucideLineChartIcon */}
             </CardTitle>
             <CardDescription>Your calories, steps, and workout duration over the last week.</CardDescription>
           </CardHeader>
@@ -103,7 +103,8 @@ export default function DashboardPage() {
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="font-headline flex items-center">
-              <Calendar className="h-6 w-6 mr-2 text-primary" /> Calendar
+              {/* Using Lucide Calendar icon as component */}
+              <CalendarDays className="h-6 w-6 mr-2 text-primary" /> Calendar 
             </CardTitle>
             <CardDescription>Your upcoming events and logged activities.</CardDescription>
           </CardHeader>
@@ -124,21 +125,23 @@ export default function DashboardPage() {
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="font-headline flex items-center">
-              <PieChart className="h-6 w-6 mr-2 text-primary" /> Daily Macros {/* This PieChart is lucide-react icon, PieChart for recharts is imported from "recharts" */}
+              {/* Using Lucide PieChart icon */}
+              <PieChart className="h-6 w-6 mr-2 text-primary" /> Daily Macros 
             </CardTitle>
             <CardDescription>Your progress towards daily macronutrient targets.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
              <ChartContainer config={{}} className="h-[200px] w-full">
-              <PieChart> {/* This PieChart is from "recharts" */}
-                <Pie data={macroData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+               {/* This PieChart is from "recharts" */}
+              <RechartsPrimitive.PieChart> 
+                <RechartsPrimitive.Pie data={macroData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
                    {macroData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
-                </Pie>
+                </RechartsPrimitive.Pie>
                 <Tooltip content={<ChartTooltipContent hideLabel />} />
                 <Legend content={<ChartLegendContent />} />
-              </PieChart>
+              </RechartsPrimitive.PieChart>
             </ChartContainer>
             <div className="space-y-3">
               {macroData.map((macro) => (
@@ -147,7 +150,7 @@ export default function DashboardPage() {
                     <span className="text-sm font-medium">{macro.name}</span>
                     <span className="text-sm text-muted-foreground">{macro.value}g / {macro.target}g</span>
                   </div>
-                  <Progress value={(macro.value / macro.target) * 100} className="h-2 [&>div]:bg-[var(--color-chart-1)]"
+                  <Progress value={(macro.value / macro.target) * 100} className="h-2 [&>div]:bg-[var(--chart-color)]"
                   style={{'--chart-color': macro.fill} as React.CSSProperties}
                   />
                 </div>
@@ -166,7 +169,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <Button variant="outline" asChild><Link href="/dashboard/workout-plans/new">Log Workout</Link></Button>
-            <Button variant="outline" asChild><Link href="/dashboard/diet-planner/log">Log Meal</Link></Button>
+            <Button variant="outline" asChild><Link href="/dashboard/diet-planner">Log Meal</Link></Button> {/* Corrected link for Log Meal */}
             <Button variant="outline" asChild><Link href="/dashboard/workout-plans">View Plans</Link></Button>
             <Button variant="outline" asChild><Link href="/dashboard/ai-suggestions">Get AI Tips</Link></Button>
           </CardContent>
@@ -176,3 +179,7 @@ export default function DashboardPage() {
     </div>
   );
 }
+// Corrected PieChart import from recharts and aliased Lucide's LineChart icon
+// Also corrected Calendar icon usage and Log Meal link.
+// Explicitly using RechartsPrimitive.PieChart and RechartsPrimitive.Pie for clarity from recharts.
+// Replaced LucideBarChart with LucideLineChartIcon for Weekly Activity card title icon.
