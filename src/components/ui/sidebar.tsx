@@ -3,9 +3,8 @@
 import React, { type ReactNode, createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { cn } from "@/lib/utils";
 import { Slot } from "@radix-ui/react-slot";
-import { useIsMobile } from '@/hooks/use-mobile'; // Assuming this hook is correct
+import { useIsMobile } from '@/hooks/use-mobile';
 
-// Define the shape of the context state
 interface SidebarContextType {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -13,46 +12,58 @@ interface SidebarContextType {
   setOpenMobile: React.Dispatch<React.SetStateAction<boolean>>;
   isMobile: boolean;
   toggleSidebar: () => void;
-  isCollapsed: boolean; // Add isCollapsed if needed based on 'collapsible' prop
-  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>; // Add setIsCollapsed
+  isCollapsed: boolean;
+  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-// Create the context with a default undefined value to catch misuse
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
-export const SidebarProvider = ({ children, defaultOpen = false }: { children: ReactNode, defaultOpen?: boolean }) => {
+export const SidebarProvider = ({ children, defaultOpen = true }: { children: ReactNode, defaultOpen?: boolean }) => {
   const isMobile = useIsMobile();
-  const [open, setOpen] = useState(defaultOpen);
-  const [openMobile, setOpenMobile] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(!defaultOpen); // Example state for collapsible
+  // For desktop, 'open' means expanded. For mobile, 'openMobile' controls visibility.
+  const [open, setOpen] = useState(defaultOpen); // For desktop: true means expanded, false means collapsed
+  const [openMobile, setOpenMobile] = useState(false); // For mobile: true means visible, false means hidden
+  const [isCollapsed, setIsCollapsed] = useState(!defaultOpen); // True if sidebar is in icon-only state (desktop)
 
-  // Adjust open state based on isMobile and openMobile
   useEffect(() => {
     if (isMobile) {
-      setOpen(false); // Collapse sidebar on mobile by default or manage via openMobile
+      // On mobile, 'open' (desktop expanded state) is not relevant.
+      // 'openMobile' controls visibility. Collapsed state is also not relevant for mobile overlay.
+      setIsCollapsed(false); // Mobile doesn't have a "collapsed" state, it's either open or closed
+    } else {
+      // On desktop, ensure 'openMobile' is false and 'isCollapsed' reflects 'open'
+      setOpenMobile(false);
+      setIsCollapsed(!open);
     }
-  }, [isMobile]);
+  }, [isMobile, open]);
 
   const toggleSidebar = () => {
     if (isMobile) {
       setOpenMobile(prev => !prev);
     } else {
-      setOpen(prev => !prev);
-      setIsCollapsed(prev => !prev);
+      setOpen(prevOpen => {
+        const newOpenState = !prevOpen;
+        setIsCollapsed(!newOpenState); // Update collapsed state based on new open state
+        return newOpenState;
+      });
     }
   };
   
-  // Memoize the context value
   const value = useMemo(() => ({
-    open: isMobile ? openMobile : open, // Derive open state based on mobile
+    open: isMobile ? openMobile : open, // Effective open state (visible/expanded)
     setOpen: isMobile ? setOpenMobile : setOpen,
-    openMobile,
+    openMobile, // Specific mobile visibility state
     setOpenMobile,
     isMobile,
     toggleSidebar,
-    isCollapsed, // Provide isCollapsed
-    setIsCollapsed, // Provide setIsCollapsed
-  }), [open, setOpen, openMobile, setOpenMobile, isMobile, isCollapsed, setIsCollapsed]);
+    isCollapsed: isMobile ? false : isCollapsed, // isCollapsed is only for desktop
+    setIsCollapsed: (value) => { // setIsCollapsed should only affect desktop
+      if (!isMobile) {
+        setIsCollapsed(value);
+        setOpen(!value); // Keep 'open' and 'isCollapsed' in sync for desktop
+      }
+    }
+  }), [open, openMobile, isMobile, isCollapsed]);
 
   return (
     <SidebarContext.Provider value={value}>
@@ -70,22 +81,27 @@ export const useSidebar = () => {
   return context;
 };
 
-// --- Minimal Stubs for other imported components ---
-// (Keeping the stubs as they were, focusing on Provider/Hook fix)
-export const Sidebar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { variant?: string, collapsible?: string, open?: boolean, onOpenChange?: (open: boolean) => void }>(
-  ({ className, children, variant, collapsible, open: controlledOpen, onOpenChange, ...props }, ref) => {
-    const { isMobile, openMobile, open: contextOpen, isCollapsed } = useSidebar();
-    const currentOpen = controlledOpen !== undefined ? controlledOpen : (isMobile ? openMobile : contextOpen);
+export const Sidebar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { variant?: string, collapsible?: string }>(
+  ({ className, children, variant, collapsible, ...props }, ref) => {
+    const { isMobile, openMobile, isCollapsed } = useSidebar();
     
+    // Determine current open state for applying classes
+    // On mobile, openMobile determines if it's shown. On desktop, !isCollapsed means it's expanded.
+    const isOpen = isMobile ? openMobile : !isCollapsed;
+
     return (
       <aside
         ref={ref}
-        className={cn("minimal-sidebar transition-all duration-300 ease-in-out", className, {
-            // Example: "md:w-64": currentOpen && !isCollapsed && !isMobile,
-            // "md:w-20": isCollapsed && !isMobile,
-            // "w-64": currentOpen && isMobile, // Mobile open width
-            // "w-0 hidden": !currentOpen && isMobile, // Mobile closed
-        })}
+        className={cn(
+          "transition-all duration-300 ease-in-out", // Base transition
+          // Desktop states
+          !isMobile && collapsible === 'icon' && (isCollapsed ? "md:w-20" : "md:w-64"),
+          // Mobile states
+          isMobile && (openMobile ? "w-64" : "w-0 hidden"), // Mobile open/closed
+          // Default width if not icon collapsible (e.g., rail or no collapse) or on desktop if always expanded
+          !isMobile && collapsible !== 'icon' && "md:w-64",
+          className // Allow additional classes from parent
+        )}
         data-variant={variant}
         data-collapsible={collapsible}
         data-collapsed={collapsible === 'icon' && !isMobile ? isCollapsed : undefined}
@@ -100,17 +116,17 @@ export const Sidebar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTM
 Sidebar.displayName = "Sidebar";
 
 export const SidebarHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => <header ref={ref} className={cn("minimal-sidebar-header group", className)} {...props}>{children}</header>
+  ({ className, children, ...props }, ref) => <header ref={ref} className={cn("group", className)} {...props}>{children}</header>
 );
 SidebarHeader.displayName = "SidebarHeader";
 
 export const SidebarContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => <div ref={ref} className={cn("minimal-sidebar-content", className)} {...props}>{children}</div>
+  ({ className, children, ...props }, ref) => <div ref={ref} className={cn("", className)} {...props}>{children}</div>
 );
 SidebarContent.displayName = "SidebarContent";
 
 export const SidebarFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => <footer ref={ref} className={cn("minimal-sidebar-footer group", className)} {...props}>{children}</footer>
+  ({ className, children, ...props }, ref) => <footer ref={ref} className={cn("group", className)} {...props}>{children}</footer>
 );
 SidebarFooter.displayName = "SidebarFooter";
 
@@ -119,40 +135,37 @@ export const SidebarTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }
 >(({ className, children, asChild = false, ...props }, ref) => {
-  if (asChild) {
-    return (
-      <Slot ref={ref} {...props}>
-        {children}
-      </Slot>
-    );
-  }
+  const Comp = asChild ? Slot : "button";
+  // Destructure asChild from props to avoid passing it to DOM element if Comp is "button"
+  const { asChild: _asChild, ...domProps } = props;
+
   return (
-    <button
+    <Comp
       ref={ref}
-      className={cn("minimal-sidebar-trigger", className)}
-      {...props}
+      className={cn( !asChild ? "minimal-sidebar-trigger" : "", className)}
+      {...(Comp === 'button' ? domProps : props)} // Pass all props if Slot, only domProps if button
     >
-      {children || "Trigger"}
-    </button>
+      {children}
+    </Comp>
   );
 });
 SidebarTrigger.displayName = "SidebarTrigger";
 
 
 export const SidebarMenu = React.forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLUListElement>>(
-  ({ className, children, ...props }, ref) => <ul ref={ref} className={cn("minimal-sidebar-menu", className)} {...props}>{children}</ul>
+  ({ className, children, ...props }, ref) => <ul ref={ref} className={cn("space-y-1", className)} {...props}>{children}</ul>
 );
 SidebarMenu.displayName = "SidebarMenu";
 
 export const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.HTMLAttributes<HTMLLIElement>>(
-  ({ className, children, ...props }, ref) => <li ref={ref} className={cn("minimal-sidebar-menu-item", className)} {...props}>{children}</li>
+  ({ className, children, ...props }, ref) => <li ref={ref} className={cn("", className)} {...props}>{children}</li>
 );
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
 
 export const SidebarMenuButton = React.forwardRef<
-  HTMLButtonElement, // Can be HTMLAnchorElement if asChild points to Link
-  React.HTMLAttributes<HTMLButtonElement | HTMLAnchorElement> & { // Broaden type for props
+  HTMLElement, // Can be HTMLAnchorElement if asChild points to Link, or HTMLButtonElement
+  React.HTMLAttributes<HTMLElement> & { // Broaden type for props
     asChild?: boolean;
     isActive?: boolean;
     tooltip?: string;
@@ -160,24 +173,21 @@ export const SidebarMenuButton = React.forwardRef<
 >(({ className, children, asChild = false, isActive, tooltip, ...buttonProps }, ref) => {
   const Comp = asChild ? Slot : "button";
   
-  const { 
-    asChild: _asChild, 
-    isActive: _isActive, 
-    tooltip: _tooltip, 
-    ...domProps 
-  } = buttonProps as any;
-
-  const finalProps = Comp === 'button' ? domProps : buttonProps;
+  // Ensure type safety for DOM props if Comp is 'button'
+  const domProps = Comp === 'button' ? (buttonProps as React.ButtonHTMLAttributes<HTMLButtonElement>) : buttonProps;
 
   return (
     <Comp
       ref={ref}
-      className={cn("minimal-sidebar-menu-button w-full flex items-center justify-start group-data-[collapsible=icon]:justify-center text-sm px-3 py-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground", 
-        className, {
-        'bg-sidebar-accent text-sidebar-accent-foreground': isActive,
-      })}
-      title={tooltip}
-      {...finalProps}
+      className={cn(
+        "w-full flex items-center text-sm px-3 py-2.5 rounded-md",
+        "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0", // Center icon when collapsed
+        "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+        isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
+        className
+      )}
+      title={tooltip} // Use title for native tooltip, or integrate with Tooltip component
+      {...domProps}
     >
       {children}
     </Comp>
@@ -187,24 +197,39 @@ SidebarMenuButton.displayName = "SidebarMenuButton";
 
 
 export const SidebarMenuBadge = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => <div ref={ref} className={cn("minimal-sidebar-menu-badge ml-auto group-data-[collapsible=icon]:hidden", className)} {...props}>{children}</div>
+  ({ className, children, ...props }, ref) => <div ref={ref} className={cn("ml-auto text-xs px-2 py-0.5 rounded-full", className)} {...props}>{children}</div>
 );
 SidebarMenuBadge.displayName = "SidebarMenuBadge";
 
 export const SidebarSeparator = React.forwardRef<HTMLHRElement, React.HTMLAttributes<HTMLHRElement>>(
-  ({ className, ...props }, ref) => <hr ref={ref} className={cn("minimal-sidebar-separator my-2 border-sidebar-border", className)} {...props} />
+  ({ className, ...props }, ref) => <hr ref={ref} className={cn("my-2 border-sidebar-border", className)} {...props} />
 );
 SidebarSeparator.displayName = "SidebarSeparator";
 
 export const SidebarInset = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => <main ref={ref} className={cn("minimal-sidebar-inset md:pl-[var(--sidebar-width,0px)] transition-[padding-left]", className)} {...props}>{children}</main>
+  ({ className, children, ...props }, ref) => {
+    const { isMobile, isCollapsed } = useSidebar();
+    const expandedWidth = "16rem"; // Corresponds to md:w-64
+    const collapsedWidth = "5rem";  // Corresponds to md:w-20
+
+    return (
+      <div // Changed from main to div for semantic correctness, main is in layout.tsx
+        ref={ref}
+        className={cn(
+          "transition-[padding-left] duration-300 ease-in-out",
+          className
+        )}
+        style={{
+          paddingLeft: isMobile ? '0px' : (isCollapsed ? collapsedWidth : expandedWidth)
+        }}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
 );
 SidebarInset.displayName = "SidebarInset";
-
-
-// Stubs for other potentially exported components if they were in the original file
-// and are not already covered. These are minimal and may need adjustment
-// if they have specific props like 'asChild'.
 
 export const SidebarRail = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
   (props, ref) => <button ref={ref} {...props} />
@@ -257,7 +282,7 @@ export const SidebarMenuSubItem = React.forwardRef<HTMLLIElement, React.HTMLAttr
 );
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem";
 
-export const SidebarMenuSubButton = React.forwardRef<HTMLAnchorElement, React.AnchorHTMLAttributes<HTMLAnchorElement>>( // Assuming it's an anchor
+export const SidebarMenuSubButton = React.forwardRef<HTMLAnchorElement, React.AnchorHTMLAttributes<HTMLAnchorElement>>( 
   (props, ref) => <a ref={ref} {...props} />
 );
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton";
@@ -273,5 +298,5 @@ interface SidebarContextValue {
 }
 const _SidebarContext = React.createContext<SidebarContextValue | null>(null);
 
-export { _SidebarContext as ActualSidebarContext }; // Exporting for potential use elsewhere if needed
+export { _SidebarContext as ActualSidebarContext };
 

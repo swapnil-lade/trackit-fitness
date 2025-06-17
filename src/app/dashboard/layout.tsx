@@ -58,7 +58,7 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider defaultOpen>
-      <div className="flex min-h-screen w-full bg-sidebar"> {/* Changed background here */}
+      <div className="flex min-h-screen w-full bg-sidebar"> {/* Ensures sidebar background appears full height */}
         <Sidebar 
             variant="sidebar" 
             collapsible="icon" 
