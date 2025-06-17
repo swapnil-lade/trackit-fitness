@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react"
@@ -13,7 +14,7 @@ export function useIsMobile() {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
     mql.addEventListener("change", onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT) // Initial check
     return () => mql.removeEventListener("change", onChange)
   }, [])
 
