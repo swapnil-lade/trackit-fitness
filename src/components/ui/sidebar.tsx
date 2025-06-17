@@ -6,13 +6,13 @@ import { Slot } from "@radix-ui/react-slot";
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SidebarContextType {
-  open: boolean;
+  open: boolean; // Represents expanded state on desktop, or visible state on mobile
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  openMobile: boolean;
+  openMobile: boolean; // Explicit mobile visibility state
   setOpenMobile: React.Dispatch<React.SetStateAction<boolean>>;
   isMobile: boolean;
   toggleSidebar: () => void;
-  isCollapsed: boolean;
+  isCollapsed: boolean; // Desktop specific: true if sidebar is icon-only
   setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -20,50 +20,64 @@ const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export const SidebarProvider = ({ children, defaultOpen = true }: { children: ReactNode, defaultOpen?: boolean }) => {
   const isMobile = useIsMobile();
-  // For desktop, 'open' means expanded. For mobile, 'openMobile' controls visibility.
-  const [open, setOpen] = useState(defaultOpen); // For desktop: true means expanded, false means collapsed
-  const [openMobile, setOpenMobile] = useState(false); // For mobile: true means visible, false means hidden
-  const [isCollapsed, setIsCollapsed] = useState(!defaultOpen); // True if sidebar is in icon-only state (desktop)
+  
+  // State for desktop: 'open' means expanded.
+  // 'isCollapsed' is the inverse of 'open' for desktop icon-only state.
+  const [openDesktop, setOpenDesktop] = useState(defaultOpen);
+  const [isCollapsed, setIsCollapsed] = useState(!defaultOpen);
+  
+  // State for mobile: 'openMobile' controls visibility (overlay).
+  const [openMobile, setOpenMobile] = useState(false);
 
   useEffect(() => {
     if (isMobile) {
-      // On mobile, 'open' (desktop expanded state) is not relevant.
-      // 'openMobile' controls visibility. Collapsed state is also not relevant for mobile overlay.
-      setIsCollapsed(false); // Mobile doesn't have a "collapsed" state, it's either open or closed
+      // On mobile, desktop states are not directly relevant for display.
+      // Ensure 'isCollapsed' is false as it's a desktop concept.
+      setIsCollapsed(false);
     } else {
-      // On desktop, ensure 'openMobile' is false and 'isCollapsed' reflects 'open'
+      // On desktop, sync 'isCollapsed' with 'openDesktop'.
+      // Close mobile overlay if transitioning from mobile to desktop.
       setOpenMobile(false);
-      setIsCollapsed(!open);
+      setIsCollapsed(!openDesktop);
     }
-  }, [isMobile, open]);
+  }, [isMobile, openDesktop]);
 
   const toggleSidebar = () => {
     if (isMobile) {
       setOpenMobile(prev => !prev);
     } else {
-      setOpen(prevOpen => {
+      setOpenDesktop(prevOpen => {
         const newOpenState = !prevOpen;
-        setIsCollapsed(!newOpenState); // Update collapsed state based on new open state
+        setIsCollapsed(!newOpenState); // Sync collapsed state
         return newOpenState;
       });
     }
   };
   
   const value = useMemo(() => ({
-    open: isMobile ? openMobile : open, // Effective open state (visible/expanded)
-    setOpen: isMobile ? setOpenMobile : setOpen,
-    openMobile, // Specific mobile visibility state
+    open: isMobile ? openMobile : openDesktop,
+    setOpen: (valOrUpdater) => {
+      if (isMobile) {
+        setOpenMobile(valOrUpdater);
+      } else {
+        const newOpenDesktopState = typeof valOrUpdater === 'function' ? valOrUpdater(openDesktop) : valOrUpdater;
+        setOpenDesktop(newOpenDesktopState);
+        setIsCollapsed(!newOpenDesktopState);
+      }
+    },
+    openMobile, 
     setOpenMobile,
     isMobile,
     toggleSidebar,
-    isCollapsed: isMobile ? false : isCollapsed, // isCollapsed is only for desktop
-    setIsCollapsed: (value) => { // setIsCollapsed should only affect desktop
+    isCollapsed: isMobile ? false : isCollapsed,
+    setIsCollapsed: (valOrUpdater) => { 
       if (!isMobile) {
-        setIsCollapsed(value);
-        setOpen(!value); // Keep 'open' and 'isCollapsed' in sync for desktop
+        const newCollapsedState = typeof valOrUpdater === 'function' ? valOrUpdater(isCollapsed) : valOrUpdater;
+        setIsCollapsed(newCollapsedState);
+        setOpenDesktop(!newCollapsedState); 
       }
     }
-  }), [open, openMobile, isMobile, isCollapsed]);
+  }), [openDesktop, openMobile, isMobile, isCollapsed]);
 
   return (
     <SidebarContext.Provider value={value}>
@@ -81,26 +95,27 @@ export const useSidebar = () => {
   return context;
 };
 
-export const Sidebar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { variant?: string, collapsible?: string }>(
+export const Sidebar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { variant?: string, collapsible?: "icon" | "rail" | string }>(
   ({ className, children, variant, collapsible, ...props }, ref) => {
     const { isMobile, openMobile, isCollapsed } = useSidebar();
     
-    // Determine current open state for applying classes
-    // On mobile, openMobile determines if it's shown. On desktop, !isCollapsed means it's expanded.
-    const isOpen = isMobile ? openMobile : !isCollapsed;
+    const desktopCollapsedWidth = "md:w-20"; // e.g., w-20 for 5rem
+    const desktopExpandedWidth = "md:w-64"; // e.g., w-64 for 16rem
+    const mobileOpenWidth = "w-64"; // Sidebar width when open on mobile
 
     return (
       <aside
         ref={ref}
         className={cn(
-          "transition-all duration-300 ease-in-out", // Base transition
+          "transition-all duration-300 ease-in-out", 
           // Desktop states
-          !isMobile && collapsible === 'icon' && (isCollapsed ? "md:w-20" : "md:w-64"),
-          // Mobile states
-          isMobile && (openMobile ? "w-64" : "w-0 hidden"), // Mobile open/closed
-          // Default width if not icon collapsible (e.g., rail or no collapse) or on desktop if always expanded
-          !isMobile && collapsible !== 'icon' && "md:w-64",
-          className // Allow additional classes from parent
+          !isMobile && collapsible === 'icon' && (isCollapsed ? desktopCollapsedWidth : desktopExpandedWidth),
+          // Mobile states: fixed position for overlay effect
+          isMobile && "fixed inset-y-0 left-0 z-50 transform",
+          isMobile && (openMobile ? `${mobileOpenWidth} translate-x-0` : "w-0 -translate-x-full"),
+          // Default width if not icon collapsible or on desktop if always expanded
+          !isMobile && collapsible !== 'icon' && desktopExpandedWidth,
+          className 
         )}
         data-variant={variant}
         data-collapsible={collapsible}
@@ -121,7 +136,7 @@ export const SidebarHeader = React.forwardRef<HTMLDivElement, React.HTMLAttribut
 SidebarHeader.displayName = "SidebarHeader";
 
 export const SidebarContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => <div ref={ref} className={cn("", className)} {...props}>{children}</div>
+  ({ className, children, ...props }, ref) => <div ref={ref} className={cn("group", className)} {...props}>{children}</div>
 );
 SidebarContent.displayName = "SidebarContent";
 
@@ -136,14 +151,13 @@ export const SidebarTrigger = React.forwardRef<
   React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }
 >(({ className, children, asChild = false, ...props }, ref) => {
   const Comp = asChild ? Slot : "button";
-  // Destructure asChild from props to avoid passing it to DOM element if Comp is "button"
   const { asChild: _asChild, ...domProps } = props;
 
   return (
     <Comp
       ref={ref}
-      className={cn( !asChild ? "minimal-sidebar-trigger" : "", className)}
-      {...(Comp === 'button' ? domProps : props)} // Pass all props if Slot, only domProps if button
+      className={cn( !asChild ? "" : "", className)} // Removed minimal-sidebar-trigger
+      {...(Comp === 'button' ? domProps : props)} 
     >
       {children}
     </Comp>
@@ -164,16 +178,14 @@ SidebarMenuItem.displayName = "SidebarMenuItem";
 
 
 export const SidebarMenuButton = React.forwardRef<
-  HTMLElement, // Can be HTMLAnchorElement if asChild points to Link, or HTMLButtonElement
-  React.HTMLAttributes<HTMLElement> & { // Broaden type for props
+  HTMLElement, 
+  React.HTMLAttributes<HTMLElement> & { 
     asChild?: boolean;
     isActive?: boolean;
     tooltip?: string;
   }
 >(({ className, children, asChild = false, isActive, tooltip, ...buttonProps }, ref) => {
   const Comp = asChild ? Slot : "button";
-  
-  // Ensure type safety for DOM props if Comp is 'button'
   const domProps = Comp === 'button' ? (buttonProps as React.ButtonHTMLAttributes<HTMLButtonElement>) : buttonProps;
 
   return (
@@ -181,12 +193,12 @@ export const SidebarMenuButton = React.forwardRef<
       ref={ref}
       className={cn(
         "w-full flex items-center text-sm px-3 py-2.5 rounded-md",
-        "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0", // Center icon when collapsed
+        "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0", 
         "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
         className
       )}
-      title={tooltip} // Use title for native tooltip, or integrate with Tooltip component
+      title={tooltip} 
       {...domProps}
     >
       {children}
@@ -209,18 +221,25 @@ SidebarSeparator.displayName = "SidebarSeparator";
 export const SidebarInset = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => {
     const { isMobile, isCollapsed } = useSidebar();
-    const expandedWidth = "16rem"; // Corresponds to md:w-64
-    const collapsedWidth = "5rem";  // Corresponds to md:w-20
+    // These should match the Tailwind width classes used in Sidebar component
+    const expandedWidthRem = 16; // w-64 -> 16rem
+    const collapsedWidthRem = 5; // w-20 -> 5rem
+    const baseFontSize = 16; // Assuming default browser font size for rem calculation
+
+    // Convert rem to px for style prop
+    const expandedWidthPx = `${expandedWidthRem * baseFontSize}px`; // "256px"
+    const collapsedWidthPx = `${collapsedWidthRem * baseFontSize}px`; // "80px"
+
 
     return (
-      <div // Changed from main to div for semantic correctness, main is in layout.tsx
+      <div 
         ref={ref}
         className={cn(
-          "transition-[padding-left] duration-300 ease-in-out",
+          "transition-[padding-left] duration-300 ease-in-out", // Match sidebar transition
           className
         )}
         style={{
-          paddingLeft: isMobile ? '0px' : (isCollapsed ? collapsedWidth : expandedWidth)
+          paddingLeft: isMobile ? '0px' : (isCollapsed ? collapsedWidthPx : expandedWidthPx)
         }}
         {...props}
       >
@@ -231,6 +250,7 @@ export const SidebarInset = React.forwardRef<HTMLDivElement, React.HTMLAttribute
 );
 SidebarInset.displayName = "SidebarInset";
 
+// Stubs for other potential sidebar parts, can be expanded later
 export const SidebarRail = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
   (props, ref) => <button ref={ref} {...props} />
 );
@@ -287,7 +307,8 @@ export const SidebarMenuSubButton = React.forwardRef<HTMLAnchorElement, React.An
 );
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton";
 
-interface SidebarContextValue {
+
+interface ActualSidebarContextValue { // Renamed to avoid conflict with SidebarContextType
   collapsible?: "icon" | "rail";
   collapsed?: boolean;
   onCollapse?: (collapsed: boolean) => void;
@@ -296,7 +317,6 @@ interface SidebarContextValue {
   onMobileOpen?: (open: boolean) => void;
   fullWidth?: boolean;
 }
-const _SidebarContext = React.createContext<SidebarContextValue | null>(null);
-
-export { _SidebarContext as ActualSidebarContext };
-
+// Exporting with a different name if needed for clarity, or ensure it's correctly used internally.
+export const ActualSidebarContext = React.createContext<ActualSidebarContextValue | null>(null);
+ActualSidebarContext.displayName = "ActualSidebarContext";

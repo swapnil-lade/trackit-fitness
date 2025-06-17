@@ -12,14 +12,12 @@ import {
   SidebarHeader,
   SidebarContent,
   SidebarFooter,
-  SidebarTrigger,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarMenuBadge,
   SidebarSeparator,
   SidebarInset,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { DASHBOARD_NAV_LINKS, DASHBOARD_SETTINGS_LINKS, type NavLink } from "@/lib/constants";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -64,13 +62,13 @@ export default function DashboardLayout({
             collapsible="icon" 
             className="border-r bg-sidebar text-sidebar-foreground data-[collapsed=true]:hidden md:data-[collapsed=true]:flex fixed h-full z-40 md:sticky flex flex-col"
         >
-          <SidebarHeader className="p-4">
-            <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
+          <SidebarHeader className="p-4 flex items-center group-data-[collapsible=icon]:justify-center">
+            <Link href="/dashboard" className="flex items-center gap-2">
               <Logo className="h-8 w-auto text-primary group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7" />
             </Link>
           </SidebarHeader>
-          <SidebarContent className="p-2 flex-1 flex flex-col"> {/* Ensures content area fills space */}
-            <ScrollArea className="flex-1"> {/* ScrollArea takes full height of SidebarContent */}
+          <SidebarContent className="p-2 flex-1 flex flex-col">
+            <ScrollArea className="flex-1"> 
               <SidebarMenu>{renderNavLinks(DASHBOARD_NAV_LINKS)}</SidebarMenu>
             </ScrollArea>
           </SidebarContent>
@@ -103,7 +101,7 @@ export default function DashboardLayout({
         </Sidebar>
         <SidebarInset className="flex flex-col flex-1">
           <DashboardNavbar />
-          <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8 bg-background"> {/* Content has its own background */}
+          <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8 bg-background">
             {children}
           </main>
         </SidebarInset>

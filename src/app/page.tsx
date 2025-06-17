@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -31,7 +32,7 @@ const features = [
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background">
       <Navbar />
       <main className="flex-grow">
         {/* Hero Section */}
@@ -43,7 +44,7 @@ export default function LandingPage() {
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
               Trackit helps you seamlessly manage your workouts, diet, and schedule. Get smarter with AI-driven insights to reach your goals faster.
             </p>
-            <Button size="lg" asChild className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Button size="lg" asChild className="shadow-lg hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105">
               <Link href="/register">Get Started For Free</Link>
             </Button>
             <div className="mt-16 relative">
@@ -70,14 +71,14 @@ export default function LandingPage() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {features.map((feature) => (
-                <Card key={feature.title} className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col text-center">
-                  <CardHeader className="items-center">
-                    <div className="p-3 rounded-full bg-primary/10 mb-4">
+                <Card key={feature.title} className="shadow-lg hover:shadow-xl hover:border-primary/50 transition-all duration-300 flex flex-col text-center group">
+                  <CardHeader className="items-center pt-8">
+                    <div className="p-4 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300 mb-4">
                       {feature.icon}
                     </div>
-                    <CardTitle className="font-headline text-xl">{feature.title}</CardTitle>
+                    <CardTitle className="font-headline text-xl group-hover:text-primary transition-colors duration-300">{feature.title}</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pb-8">
                     <p className="text-muted-foreground text-sm">{feature.description}</p>
                   </CardContent>
                 </Card>
@@ -95,20 +96,28 @@ export default function LandingPage() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               {['Free', 'Pro', 'Team'].map((planName, index) => (
-                <Card key={planName} className={`shadow-lg hover:shadow-xl transition-shadow duration-300 ${index === 1 ? 'border-2 border-primary transform scale-105' : ''}`}>
-                  <CardHeader>
+                <Card 
+                  key={planName} 
+                  className={`shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col ${index === 1 ? 'border-2 border-primary transform md:scale-105 ring-4 ring-primary/20' : 'hover:border-primary/30'}`}
+                >
+                  <CardHeader className="pt-8">
                     <CardTitle className="font-headline text-2xl">{planName}</CardTitle>
-                    <p className="text-4xl font-bold">${index === 0 ? '0' : (index * 10 + 5)}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                    <p className="text-4xl font-bold my-2">${index === 0 ? '0' : (index * 10 + 5)}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
                   </CardHeader>
-                  <CardContent className="text-left">
+                  <CardContent className="text-left flex-grow flex flex-col justify-between">
                     <ul className="space-y-2 mb-6">
                       {[...Array(3 + index)].map((_, i) => (
                         <li key={i} className="flex items-center">
-                          <CheckCircle className="h-5 w-5 text-green-500 mr-2" /> Feature {i + 1}
+                          <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" /> 
+                          <span className="text-sm">Feature {i + 1} for {planName} plan</span>
                         </li>
                       ))}
+                       {index === 0 && <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" /><span className="text-sm">Basic AI Suggestions</span></li>}
+                       {index === 1 && <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" /><span className="text-sm">Advanced AI Suggestions</span></li>}
+                       {index === 1 && <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" /><span className="text-sm">Priority Support</span></li>}
+                       {index === 2 && <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" /><span className="text-sm">Team Collaboration Tools</span></li>}
                     </ul>
-                    <Button className="w-full" variant={index === 1 ? 'default' : 'outline'}>
+                    <Button className="w-full mt-auto" variant={index === 1 ? 'default' : 'outline'}>
                       {index === 0 ? 'Get Started' : 'Choose Plan'}
                     </Button>
                   </CardContent>
@@ -125,7 +134,7 @@ export default function LandingPage() {
             <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
               Join Trackit today and take the first step towards a healthier, stronger you.
             </p>
-            <Button size="lg" asChild className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Button size="lg" asChild className="shadow-lg hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105">
               <Link href="/register">Sign Up Now</Link>
             </Button>
           </div>
