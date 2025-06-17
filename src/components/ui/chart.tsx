@@ -131,7 +131,8 @@ const ChartTooltipContent = React.forwardRef<
       color, 
       nameKey,
       labelKey,
-      accessibilityLayer, // Destructure accessibilityLayer here
+      accessibilityLayer,
+      allowEscapeViewBox, // Destructure allowEscapeViewBox here
       ...props
     },
     ref
@@ -371,4 +372,5 @@ export {
   ChartLegendContent,
   ChartStyle,
 }
+
 
