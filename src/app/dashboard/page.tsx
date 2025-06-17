@@ -13,13 +13,13 @@ import { Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Pie, PieChart 
 import React, { useState, useEffect } from "react";
 
 const initialDailyProgressData = [
-  { day: "Mon", calories: 0, steps: 0, workout: 0 },
-  { day: "Tue", calories: 0, steps: 0, workout: 0 },
-  { day: "Wed", calories: 0, steps: 0, workout: 0 },
-  { day: "Thu", calories: 0, steps: 0, workout: 0 },
-  { day: "Fri", calories: 0, steps: 0, workout: 0 },
-  { day: "Sat", calories: 0, steps: 0, workout: 0 },
-  { day: "Sun", calories: 0, steps: 0, workout: 0 },
+  { day: "Mon", calories: 0, workout: 0 },
+  { day: "Tue", calories: 0, workout: 0 },
+  { day: "Wed", calories: 0, workout: 0 },
+  { day: "Thu", calories: 0, workout: 0 },
+  { day: "Fri", calories: 0, workout: 0 },
+  { day: "Sat", calories: 0, workout: 0 },
+  { day: "Sun", calories: 0, workout: 0 },
 ];
 
 const initialMacroData = [
@@ -29,7 +29,6 @@ const initialMacroData = [
 ];
 const chartConfig = {
   calories: { label: "Calories", color: "hsl(var(--chart-1))" },
-  steps: { label: "Steps", color: "hsl(var(--chart-2))" },
   workout: { label: "Workout (min)", color: "hsl(var(--chart-3))" },
 };
 
@@ -66,7 +65,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Fitness Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"> {/* Adjusted for 3 stats */}
         {FITNESS_STATS_DATA.map((stat) => (
           <Card key={stat.title} className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -88,7 +87,7 @@ export default function DashboardPage() {
             <CardTitle className="font-headline flex items-center">
               <LucideLineChartIcon className="h-6 w-6 mr-2 text-primary" /> Weekly Activity
             </CardTitle>
-            <CardDescription>Your calories, steps, and workout duration over the last week.</CardDescription>
+            <CardDescription>Your calories and workout duration over the last week.</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -99,7 +98,6 @@ export default function DashboardPage() {
                 <Tooltip content={<ChartTooltipContent indicator="dot" />} />
                 <Legend content={<ChartLegendContent />} />
                 <Line type="monotone" dataKey="calories" stroke="var(--color-calories)" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="steps" stroke="var(--color-steps)" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="workout" stroke="var(--color-workout)" strokeWidth={2} dot={false} />
               </LineChart>
             </ChartContainer>
@@ -172,7 +170,7 @@ export default function DashboardPage() {
             <CardDescription>Quickly access common tasks.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <Button variant="outline" asChild><Link href="/dashboard/workout-plans/new">Log Workout</Link></Button>
+            <Button variant="outline" asChild><Link href="/dashboard/workout-plans">Log Workout</Link></Button>
             <Button variant="outline" asChild><Link href="/dashboard/diet-planner">Log Meal</Link></Button>
             <Button variant="outline" asChild><Link href="/dashboard/workout-plans">View Plans</Link></Button>
             <Button variant="outline" asChild><Link href="/dashboard/daily-schedule">View Schedule</Link></Button>

@@ -38,7 +38,6 @@ export const DASHBOARD_SETTINGS_LINKS: NavLink[] = [
 
 export const FITNESS_STATS_DATA = [
   { title: 'Calories Burned', value: '0', unit: 'kcal', icon: Flame, color: 'text-red-500' },
-  { title: 'Steps Taken', value: '0', unit: 'steps', icon: Footprints, color: 'text-blue-500' },
   { title: 'Current Workout', value: 'N/A', unit: '', icon: Dumbbell, color: 'text-green-500' },
   { title: 'Meals Logged', value: '0', unit: 'meals', icon: Utensils, color: 'text-orange-500' },
 ];
