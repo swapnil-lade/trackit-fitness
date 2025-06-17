@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,7 +31,7 @@ export default function DailySchedulePage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   // Form state
   const [taskTitle, setTaskTitle] = useState('');
@@ -40,6 +41,7 @@ export default function DailySchedulePage() {
   const [taskDescription, setTaskDescription] = useState('');
 
   useEffect(() => {
+    setCurrentTime(new Date());
     const timer = setInterval(() => setCurrentTime(new Date()), 60000); // Update every minute
     return () => clearInterval(timer);
   }, []);
@@ -104,7 +106,9 @@ export default function DailySchedulePage() {
 
       <Card className="flex-grow shadow-lg flex flex-col overflow-hidden">
         <CardHeader>
-          <CardTitle className="font-headline">Today's Plan - {format(currentTime, "eeee, MMMM do")}</CardTitle>
+          <CardTitle className="font-headline">
+            {currentTime ? `Today's Plan - ${format(currentTime, "eeee, MMMM do")}` : "Today's Plan"}
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex-grow p-0 relative">
           <ScrollArea className="h-full absolute inset-0">
@@ -123,7 +127,7 @@ export default function DailySchedulePage() {
                 {hoursOfDay.map(hour => (
                   <div key={`hour-block-${hour}`} className="h-24 border-b relative" onClick={() => handleOpenModal(null, hour)}>
                      {/* Current Time Indicator */}
-                    {isSameHour(currentTime, setHours(new Date(), hour)) && (
+                    {currentTime && isSameHour(currentTime, setHours(new Date(), hour)) && (
                       <div 
                         className="absolute left-0 right-0 h-0.5 bg-red-500 z-10"
                         style={{ top: `${(currentTime.getMinutes() / 60) * 100}%` }}
@@ -139,7 +143,7 @@ export default function DailySchedulePage() {
                         const TaskIcon = task.icon || Clock;
                         const taskStart = setMinutes(setHours(new Date(), parseInt(task.time.split(':')[0])), parseInt(task.time.split(':')[1]));
                         const taskEnd = addMinutes(taskStart, task.duration);
-                        const isUpcoming = isBefore(currentTime, taskEnd) && isBefore(taskStart, addMinutes(currentTime, 30));
+                        const isUpcoming = currentTime && isBefore(currentTime, taskEnd) && isBefore(taskStart, addMinutes(currentTime, 30));
 
 
                         return (
@@ -225,3 +229,5 @@ export default function DailySchedulePage() {
     </div>
   );
 }
+
+    

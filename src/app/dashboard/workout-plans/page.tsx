@@ -4,13 +4,12 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, Edit3, Trash2, Dumbbell, CalendarDays, Target, Repeat, Clock, Eye } from "lucide-react";
-import { Badge } from '@/components/ui/badge';
 
 interface Exercise {
   id: string;
@@ -49,19 +48,15 @@ export default function WorkoutPlansPage() {
         setPlans(JSON.parse(storedPlans));
       } catch (e) {
         console.error("Failed to parse workout plans from localStorage", e);
-        localStorage.removeItem('workoutPlans'); // Clear corrupted data
+        localStorage.removeItem('workoutPlans'); 
       }
     }
   }, []);
 
   useEffect(() => {
-    // Only save if plans array is not empty or it's the initial empty state from a successful load
-    // This prevents overwriting good data with an empty array during initial mount if localStorage is slow
-    if (plans.length > 0 || localStorage.getItem('workoutPlans')) {
+    if (plans.length > 0 || (localStorage.getItem('workoutPlans') && JSON.parse(localStorage.getItem('workoutPlans')!).length > 0)) {
         localStorage.setItem('workoutPlans', JSON.stringify(plans));
-    }
-    // If plans become empty after having data, clear localStorage
-    if (plans.length === 0 && localStorage.getItem('workoutPlans') && JSON.parse(localStorage.getItem('workoutPlans')!).length > 0) {
+    } else if (plans.length === 0 && localStorage.getItem('workoutPlans')) {
         localStorage.removeItem('workoutPlans');
     }
   }, [plans]);
@@ -260,3 +255,5 @@ export default function WorkoutPlansPage() {
     </div>
   );
 }
+
+    

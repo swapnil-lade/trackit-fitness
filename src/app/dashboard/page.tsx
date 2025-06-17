@@ -12,7 +12,6 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLe
 import { Cell, Line, LineChart, Pie, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import React, { useState, useEffect } from "react";
 
-// Basic interfaces for data loaded from localStorage
 interface Meal {
   id: string;
   name: string;
@@ -26,10 +25,9 @@ interface Meal {
 interface WorkoutPlan {
   id: string;
   name: string;
-  // Add other relevant fields if needed for future dashboard integration
 }
 
-const initialDailyProgressData = [
+const initialDailyProgressDataTemplate = [
   { day: "Mon", calories: 0, workout: 0 },
   { day: "Tue", calories: 0, workout: 0 },
   { day: "Wed", calories: 0, workout: 0 },
@@ -39,8 +37,8 @@ const initialDailyProgressData = [
   { day: "Sun", calories: 0, workout: 0 },
 ];
 
-const initialMacroData = [
-  { name: 'Protein', value: 0, target: 150, fill: 'hsl(var(--chart-1))' }, // Target can be user-configurable
+const initialMacroDataTemplate = [
+  { name: 'Protein', value: 0, target: 150, fill: 'hsl(var(--chart-1))' },
   { name: 'Carbs', value: 0, target: 250, fill: 'hsl(var(--chart-2))' },
   { name: 'Fat', value: 0, target: 70, fill: 'hsl(var(--chart-3))' },
 ];
@@ -52,17 +50,17 @@ const chartConfig = {
 
 const dayMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-
 export default function DashboardPage() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [greeting, setGreeting] = useState("Good Morning");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [greeting, setGreeting] = useState("Welcome");
   
   const [fitnessStats, setFitnessStats] = useState(FITNESS_STATS_DATA_PLACEHOLDERS);
-  const [dailyProgressData, setDailyProgressData] = useState(initialDailyProgressData);
-  const [macroData, setMacroData] = useState(initialMacroData);
-
+  const [dailyProgressData, setDailyProgressData] = useState(initialDailyProgressDataTemplate);
+  const [macroData, setMacroData] = useState(initialMacroDataTemplate);
 
   useEffect(() => {
+    setSelectedDate(new Date());
+
     const currentHour = new Date().getHours();
     if (currentHour < 12) {
       setGreeting("Good Morning");
@@ -72,7 +70,6 @@ export default function DashboardPage() {
       setGreeting("Good Evening");
     }
 
-    // Load data from localStorage
     const storedMealsData = localStorage.getItem('loggedMeals');
     const loadedMeals: Meal[] = storedMealsData ? JSON.parse(storedMealsData) : [];
     
@@ -94,9 +91,9 @@ export default function DashboardPage() {
     ]);
 
     setMacroData([
-      { name: 'Protein', value: todayTotals.protein, target: initialMacroData[0].target, fill: 'hsl(var(--chart-1))' },
-      { name: 'Carbs', value: todayTotals.carbs, target: initialMacroData[1].target, fill: 'hsl(var(--chart-2))' },
-      { name: 'Fat', value: todayTotals.fat, target: initialMacroData[2].target, fill: 'hsl(var(--chart-3))' },
+      { name: 'Protein', value: todayTotals.protein, target: initialMacroDataTemplate[0].target, fill: 'hsl(var(--chart-1))' },
+      { name: 'Carbs', value: todayTotals.carbs, target: initialMacroDataTemplate[1].target, fill: 'hsl(var(--chart-2))' },
+      { name: 'Fat', value: todayTotals.fat, target: initialMacroDataTemplate[2].target, fill: 'hsl(var(--chart-3))' },
     ]);
     
     const currentDayString = dayMap[new Date().getDay()];
@@ -235,7 +232,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-
     </div>
   );
 }
+
+    

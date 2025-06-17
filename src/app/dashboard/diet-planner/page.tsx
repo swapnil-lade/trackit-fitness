@@ -4,14 +4,14 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { PlusCircle, Edit3, Trash2, Apple, Utensils, Droplets, Flame, PieChart as PieChartIcon } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Bar, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Pie, PieChart as RechartsPieChart, Cell, Legend } from "recharts";
+import { Pie, PieChart as RechartsPieChart, Cell, Legend, ResponsiveContainer } from "recharts";
 
 
 interface Meal {
@@ -57,16 +57,16 @@ export default function DietPlannerPage() {
         setLoggedMeals(JSON.parse(storedMeals));
       } catch (e) {
         console.error("Failed to parse logged meals from localStorage", e);
-        localStorage.removeItem('loggedMeals'); // Clear corrupted data
+        localStorage.removeItem('loggedMeals'); 
       }
     }
   }, []);
 
   useEffect(() => {
-    if (loggedMeals.length > 0 || localStorage.getItem('loggedMeals')) {
+    if (loggedMeals.length > 0 || (localStorage.getItem('loggedMeals') && JSON.parse(localStorage.getItem('loggedMeals')!).length > 0) ) {
         localStorage.setItem('loggedMeals', JSON.stringify(loggedMeals));
-    }
-    if (loggedMeals.length === 0 && localStorage.getItem('loggedMeals') && JSON.parse(localStorage.getItem('loggedMeals')!).length > 0) {
+    } else if (loggedMeals.length === 0 && localStorage.getItem('loggedMeals')) {
+        // If meals are cleared and item exists, remove it
         localStorage.removeItem('loggedMeals');
     }
   }, [loggedMeals]);
@@ -291,4 +291,5 @@ export default function DietPlannerPage() {
     </div>
   );
 }
+
     

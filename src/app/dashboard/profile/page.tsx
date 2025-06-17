@@ -11,19 +11,28 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Edit3, Mail, CalendarDays, MapPin, Target, ShieldCheck, UserCircle } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ProfilePage() {
-  // In a real app, this data would come from user state/API
   const [userName, setUserName] = useState("User");
   const [userBio, setUserBio] = useState("Fitness Enthusiast | Aspiring Achiever");
   const [userEmail, setUserEmail] = useState("user@example.com");
-  const [joinDate, setJoinDate] = useState("Not set"); // Or a default like new Date().toLocaleDateString()
+  const [joinDate, setJoinDate] = useState("Not set"); 
   const [location, setLocation] = useState("Not set");
   const [fitnessGoals, setFitnessGoals] = useState<string[]>([]);
   const [displayName, setDisplayName] = useState("Your Name");
   const [dateOfBirth, setDateOfBirth] = useState("Not set");
   const [aboutMe, setAboutMe] = useState("Tell us about yourself!");
+
+  useEffect(() => {
+    // In a real app, this data would be fetched from an API
+    // For now, if we want to simulate loading user-specific data that might change,
+    // it should happen here. But for default placeholders, useState is fine.
+    // Example: if joinDate were dynamic based on registration:
+    // const fetchedJoinDate = new Date().toLocaleDateString(); 
+    // setJoinDate(fetchedJoinDate);
+    // However, for "Not set" or static placeholders, direct useState is okay.
+  }, []);
 
 
   return (
@@ -48,7 +57,7 @@ export default function ProfilePage() {
                 <div className="relative">
                     <Avatar className="w-32 h-32 mb-4 border-4 border-primary shadow-md">
                         <AvatarImage src="https://placehold.co/200x200.png" alt="User Avatar" data-ai-hint="user avatar" />
-                        <AvatarFallback>U</AvatarFallback>
+                        <AvatarFallback>{displayName.charAt(0) || 'U'}</AvatarFallback>
                     </Avatar>
                     <Button size="icon" variant="outline" className="absolute bottom-4 right-0 rounded-full h-8 w-8 bg-background">
                         <Edit3 className="h-4 w-4"/>
@@ -57,7 +66,6 @@ export default function ProfilePage() {
                 </div>
               <CardTitle className="font-headline text-2xl">{displayName}</CardTitle>
               <CardDescription>{userBio}</CardDescription>
-              {/* <Badge variant="secondary" className="mt-2">Membership Tier</Badge> */}
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center text-sm">
@@ -124,16 +132,6 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">No recent activity to display.</p>
-              {/* 
-              <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-md">
-                <Image src="https://placehold.co/40x40.png" alt="Workout icon" data-ai-hint="workout icon" width={40} height={40} className="rounded-full"/>
-                <div>
-                  <p className="text-sm font-medium">Completed: Morning Run - 5km</p>
-                  <p className="text-xs text-muted-foreground">2 hours ago</p>
-                </div>
-              </div>
-              */}
-              {/* <Button variant="link" className="p-0 h-auto">View all activity</Button> */}
             </CardContent>
           </Card>
           
@@ -157,3 +155,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
