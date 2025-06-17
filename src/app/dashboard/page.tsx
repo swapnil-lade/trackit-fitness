@@ -112,7 +112,7 @@ export default function DashboardPage() {
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
-              className="rounded-md border p-0"
+              className="rounded-md border"
               disabled={(date) => date > new Date() || date < new Date("2020-01-01")}
             />
           </CardContent>
