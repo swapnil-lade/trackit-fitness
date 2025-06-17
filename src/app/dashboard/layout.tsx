@@ -68,10 +68,10 @@ export default function DashboardLayout({
           <SidebarHeader className="p-4">
             <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]:justify-center">
               <Logo className="h-8 w-auto text-primary group-data-[collapsible=icon]:h-7 group-data-[collapsible=icon]:w-7" />
-              <span className="font-bold text-lg font-headline group-data-[collapsible=icon]:hidden">Trackit</span>
+              
             </Link>
           </SidebarHeader>
-          <SidebarContent className="p-2 flex-1">
+          <SidebarContent className="p-2 flex-1 flex flex-col"> {/* Added flex flex-col */}
             <ScrollArea className="h-full"> 
               <SidebarMenu>{renderNavLinks(DASHBOARD_NAV_LINKS)}</SidebarMenu>
             </ScrollArea>
