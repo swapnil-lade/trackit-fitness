@@ -132,7 +132,9 @@ const ChartTooltipContent = React.forwardRef<
       nameKey,
       labelKey,
       accessibilityLayer,
-      allowEscapeViewBox, // Destructure allowEscapeViewBox here
+      allowEscapeViewBox,
+      animationDuration,
+      animationEasing,
       ...props
     },
     ref
@@ -372,5 +374,3 @@ export {
   ChartLegendContent,
   ChartStyle,
 }
-
-
