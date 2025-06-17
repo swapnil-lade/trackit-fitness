@@ -7,9 +7,9 @@ import { FITNESS_STATS_DATA } from "@/lib/constants";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { BarChart as LucideBarChart, LineChart as LucideLineChartIcon, CheckSquare, PlusCircle } from 'lucide-react'; // Renamed LineChart to avoid conflict
+import { BarChart as LucideBarChart, LineChart as LucideLineChartIcon, CheckSquare, PlusCircle, CalendarDays, PieChart as LucidePieChart } from 'lucide-react'; // Added CalendarDays and LucidePieChart
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Pie, PieChart, Cell, LineChart } from "recharts"; // Added LineChart here
+import { Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Pie, PieChart as RechartsPieChart, Cell, LineChart } from "recharts"; // Added LineChart here
 import React, { useState, useEffect } from "react";
 
 const dailyProgressData = [
@@ -126,22 +126,22 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="font-headline flex items-center">
               {/* Using Lucide PieChart icon */}
-              <PieChart className="h-6 w-6 mr-2 text-primary" /> Daily Macros 
+              <LucidePieChart className="h-6 w-6 mr-2 text-primary" /> Daily Macros 
             </CardTitle>
             <CardDescription>Your progress towards daily macronutrient targets.</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
              <ChartContainer config={{}} className="h-[200px] w-full">
                {/* This PieChart is from "recharts" */}
-              <RechartsPrimitive.PieChart> 
-                <RechartsPrimitive.Pie data={macroData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+              <RechartsPieChart> 
+                <Pie data={macroData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
                    {macroData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
-                </RechartsPrimitive.Pie>
+                </Pie>
                 <Tooltip content={<ChartTooltipContent hideLabel />} />
                 <Legend content={<ChartLegendContent />} />
-              </RechartsPrimitive.PieChart>
+              </RechartsPieChart>
             </ChartContainer>
             <div className="space-y-3">
               {macroData.map((macro) => (
@@ -181,5 +181,6 @@ export default function DashboardPage() {
 }
 // Corrected PieChart import from recharts and aliased Lucide's LineChart icon
 // Also corrected Calendar icon usage and Log Meal link.
-// Explicitly using RechartsPrimitive.PieChart and RechartsPrimitive.Pie for clarity from recharts.
+// Explicitly using RechartsPieChart and Pie for clarity from recharts.
 // Replaced LucideBarChart with LucideLineChartIcon for Weekly Activity card title icon.
+// Added CalendarDays to lucide-react imports. Added LucidePieChart for Daily Macros title.
