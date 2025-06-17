@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +24,7 @@ import { useState } from "react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  password: z.string().min(1, { message: "Password cannot be empty." }), // Changed min to 1
 });
 
 export function LoginForm() {
@@ -42,24 +43,25 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Reduced delay
     setIsLoading(false);
 
     // In a real app, you'd call your auth API here
     console.log("Login data:", values);
     
-    // Simulate success/error
-    if (values.email === "user@example.com" && values.password === "password") {
+    // Modified login logic: Always succeed if email and password are not empty
+    if (values.email && values.password) {
       toast({
         title: "Login Successful",
         description: "Redirecting to your dashboard...",
       });
       router.push("/dashboard");
     } else {
+      // This case should ideally not be reached due to form validation
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Invalid email or password. Please try again.",
+        description: "Please enter both email and password.",
       });
       form.resetField("password");
     }
