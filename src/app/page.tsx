@@ -44,7 +44,7 @@ export default function LandingPage() {
             </Button>
             <div className="mt-16 relative">
               <Image
-                src="https://placehold.co/1200x600.png?a=b"
+                src="https://placehold.co/1200x600.png"
                 alt="Trackit Dashboard Preview"
                 width={1200}
                 height={600}
